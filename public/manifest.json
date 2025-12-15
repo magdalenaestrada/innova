@@ -1,0 +1,10 @@
+{
+    "name" : "SistemaAlfa",
+    "short_name": "SistemaAlfa",
+    "description": "",
+    "start_url": "http://app.local",
+    "display": "standalone",
+    "background_color": "#ebeaea",
+    "theme_color": "#f9fafb",
+    "orientation": "portrait-primary"
+}

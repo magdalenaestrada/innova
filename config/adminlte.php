@@ -683,6 +683,22 @@ return [
         //    'can' => 'view doclegal',
         ],
 
+        ['header' => 'GARITA DE CONTROL',
+        // 'can' => 'view garita',
+        ],
+        [
+            'text' => 'ENTRADAS',
+            'icon_color' => 'blue',
+            'url' => '/garita',
+        //    'can' => 'view garita',
+        ],
+        [
+            'text' => 'SALIDAS',
+            'icon_color' => 'green',
+            'url' => '/garita',
+        //    'can' => 'view garita',
+        ],
+
 
 
         ['header' => ''],

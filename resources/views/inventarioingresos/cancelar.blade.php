@@ -57,9 +57,6 @@
                                 </div>
                             </div>
 
-
-
-
                             @if ($inventarioingreso->proveedor)
                                 <div class="row mb-3">
 

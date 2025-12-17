@@ -1,13 +1,13 @@
-@if (count($codigos) > 0)
-    @foreach ($codigos as $codigo)
+@if (count($clientes) > 0)
+    @foreach ($clientes as $cliente)
         <tr>
 
             <td scope="row">
-                {{ strtoupper($codigo->id) }}
+                {{ strtoupper($cliente->id) }}
             </td>
 
             <td scope="row">
-                @if ($codigo->tipo_documento == 1)
+                @if ($cliente->tipo_documento == 1)
                     DNI
                 @else
                     RUC
@@ -15,15 +15,15 @@
             </td>
 
             <td scope="row">
-                {{ strtoupper($codigo->codigo) }}
+                {{ strtoupper($cliente->codigo) }}
             </td>
 
             <td scope="row">
-                {{ strtoupper($codigo->documento) }}
+                {{ strtoupper($cliente->documento) }}
             </td>
 
             <td scope="row">
-                {{ strtoupper($codigo->nombre) }}
+                {{ strtoupper($cliente->nombre) }}
             </td>
 
 

@@ -23,7 +23,7 @@ class ClienteCodigoController extends Controller
     public function index()
     {
         $codigos = ClienteCodigo::orderBy('id', 'desc')->get();
-        return view("clientescodigo.index", compact('codigos'));
+        return view('clientescodigo.index', compact('codigos'));
     }
 
     /**d
@@ -122,9 +122,9 @@ class ClienteCodigoController extends Controller
      */
     public function searchCodigo(Request $request)
     {
-        $codigos = ClienteCodigo::where('nombre', 'like', '%' . $request->search_string . '%')
+        $clientes = ClienteCodigo::where('nombre', 'like', '%' . $request->search_string . '%')
             ->orWhere('documento', 'like', '%' . $request->search_string . '%')
             ->orderBy('created_at', 'desc')->get();
-        return view('clientescodigo.search-results', compact(var_name: 'codigos'));
+        return view('clientescodigo.search-results', compact('clientes'));
     }
 }

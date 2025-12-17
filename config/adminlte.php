@@ -673,12 +673,15 @@ return [
         ],  
 
 
-
-
-
-
-
-       
+        ['header' => 'DEPARTAMENTO LEGAL',
+        // 'can' => 'view doclegal',
+        ],
+        [
+            'text' => 'DOCUMENTACIÓN LEGAL',
+            'icon_color' => 'red',
+            'url' => '/codigos-clientes',
+        //    'can' => 'view doclegal',
+        ],
 
 
 

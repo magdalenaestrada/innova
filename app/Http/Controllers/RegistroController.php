@@ -19,7 +19,7 @@ class RegistroController extends Controller
      */
 
     public function __construct()
-    { 
+    {
         $this->middleware('permission:ver registro', ['only' => ['index']]);
         $this->middleware('permission:crear registro', ['only' => ['create', 'store']]);
         $this->middleware('permission:editar registro', ['only' => ['update', 'edit']]);
@@ -82,20 +82,16 @@ class RegistroController extends Controller
             // Llenar los campos restantes  
             $registro->documento_cliente = $request->input('documento_cliente');
             $registro->datos_cliente = $request->input('datos_cliente');
-            if ($registro->documento_conductor){
+            if ($registro->documento_conductor) {
                 $registro->documento_conductor = $request->input('documento_conductor');
-
-            }else
-            {
+            } else {
                 $registro->documento_conductor = '';
             }
 
 
-            if ($registro->documento_conductor){
+            if ($registro->documento_conductor) {
                 $registro->datos_conductor = $request->input('datos_conductor');
-
-            }else
-            {
+            } else {
                 $registro->datos_conductor = '';
             }
             $registro->documento_balanza = $request->input('documento_balanza');
@@ -254,17 +250,16 @@ class RegistroController extends Controller
         try {
             // Encuentra el modelo con el ID proporcionado
             $registro = Registro::findOrFail($id);
-    
+
             // Elimina el registro
             $registro->delete();
-    
+
             return redirect()->route('registros.index')->with('eliminar-registro', 'Registro eliminado con éxito.');
         } catch (\Exception $e) {
             // Maneja cualquier excepción que pueda ocurrir
             return redirect()->route('registros.index')->with('error', 'Error al eliminar el registro: ' . $e->getMessage());
         }
     }
-
     public function buscarDocumento(Request $request)
     {
         $documento = $request->input('documento');

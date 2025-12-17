@@ -17,7 +17,7 @@
             </div>
         </div>
         <br>
-         <div class="row justify-content-center">
+        <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="card">
                     <div class="row">
@@ -30,7 +30,7 @@
                         <table id="docs-code-table" class="table table-striped">
                             <thead>
                                 <tr>
-                                     <th scope="col">
+                                    <th scope="col">
                                         {{ __('ID') }}
                                     </th>
                                     <th scope="col">
@@ -55,13 +55,13 @@
                                 @if (count($codigos) > 0)
                                     @foreach ($codigos as $cliente)
                                         <tr>
-                                             <td scope="row">
-                                               {{ $cliente->id }}
+                                            <td scope="row">
+                                                {{ $cliente->id }}
                                             </td>
                                             <td scope="row">
                                                 @if ($cliente->tipo_documento == 1)
                                                     DNI
-                                                    @else
+                                                @else
                                                     RUC
                                                 @endif
                                             </td>
@@ -76,26 +76,19 @@
                                             </td>
 
                                             <td class="btn-group">
-                                                <a href="#" data-toggle="modal"
-                                                    data-target="#ModalEdit{{ $cliente->id }}" class="ml-1">
+                                                <button class="btn btn-sm btn-warning btn-editar-cliente"
+                                                    data-toggle="modal" data-target="#ModalEdit{{ $cliente->id }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
 
-                                                    <button class="editBtn" style=" margin-top:-3px">
-                                                        <svg height="1em" viewBox="0 0 512 512">
-                                                            <path
-                                                                d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z">
-                                                            </path>
-                                                        </svg>
-                                                    </button>
-                                                </a>
                                                 @include('clientescodigo.modal.edit', [
                                                     'id' => $cliente->id,
                                                 ])
 
-                                                <button
-    class="btn btn-sm btn-danger btn-eliminar-cliente"
-    data-url="{{ route('clientescodigo.destroy', $cliente->id) }}">
-    <i class="fa fa-trash"></i>
-</button>
+                                                <button class="btn btn-sm btn-danger btn-eliminar-cliente"
+                                                    data-url="{{ route('clientescodigo.destroy', $cliente->id) }}">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
 
                                             </td>
                                         </tr>
@@ -113,8 +106,8 @@
                 </div>
             </div>
         </div>
-    </div> 
-    @include("clientescodigo.modal.create")
+    </div>
+    @include('clientescodigo.modal.create')
 
 @section('js')
     <script type="text/javascript">
@@ -139,59 +132,126 @@
             });
         });
 
-         $(document).on('click', '.btn-eliminar-cliente', function () {
-        let url = $(this).data('url');
-        let $row = $(this).closest('tr'); // Guardar referencia a la fila
 
-        Swal.fire({
-            title: '¿Eliminar cliente?',
-            text: 'Esta acción no se puede deshacer',
-            type: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.value) {
+        $(document).ready(function() {
+            $('.crear-empleado').on('submit', function(e) {
+                e.preventDefault(); // prevenimos el envío hasta que se valide
+
+                var tipoDocumento = $('select[name="tipo_documento"]').val(); // 1=DNI, 2=RUC
+                var documento = $('#documento').val().trim();
+                var nombre = $('#nombre').val().trim();
+                var longitud = documento.length;
+
+                // Validación de longitud
+                if ((tipoDocumento == 1 && longitud != 8) || (tipoDocumento == 2 && longitud != 11)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Documento inválido',
+                        text: tipoDocumento == 1 ?
+                            'El DNI debe tener 8 dígitos.' : 'El RUC debe tener 11 dígitos.'
+                    });
+                    return false; // detener envío
+                }
+
+                // Validación de campos vacíos (opcional)
+                if (!documento || !nombre) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Campos vacíos',
+                        text: 'Todos los campos son obligatorios.'
+                    });
+                    return false;
+                }
+
+                // Validación de documento único vía AJAX
                 $.ajax({
-                    url: url,
-                    type: 'DELETE',
+                    url: '{{ route('clientescodigo.validarDocumento') }}', // Ruta que validarás en el backend
+                    type: 'POST',
                     data: {
-                        _token: '{{ csrf_token() }}'
+                        _token: '{{ csrf_token() }}',
+                        documento: documento
                     },
-                    success: function (response) {
-                        // Remover la fila de la tabla
-                        $row.fadeOut(400, function() {
-                            $(this).remove();
-                            
-                            // Verificar si quedan filas en la tabla
-                            if ($('#docs-code-table tbody tr').length === 0) {
-                                $('#docs-code-table tbody').html(
-                                    '<tr><td colspan="6" class="text-center text-muted">NO HAY DATOS DISPONIBLES</td></tr>'
-                                );
-                            }
-                        });
-
-                        Swal.fire({
-                            type: 'success',
-                            title: '¡Eliminado!',
-                            text: response.message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
+                    success: function(response) {
+                        if (response.exists) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Documento duplicado',
+                                text: 'Este cliente ya tiene un código asignado.'
+                            });
+                            return false;
+                        } else {
+                            // Si todo está bien, enviar el formulario
+                            e.currentTarget.submit();
+                        }
                     },
-                    error: function(xhr, status, error) {
+                    error: function() {
                         Swal.fire({
-                            type: 'error',
+                            icon: 'error',
                             title: 'Error',
-                            text: 'No se pudo eliminar el cliente',
-                            showConfirmButton: true
+                            text: 'No se pudo validar el documento.'
                         });
                     }
                 });
-            }
+            });
         });
-    });
-  
+
+
+        $(document).on('click', '.btn-eliminar-cliente', function() {
+            let url = $(this).data('url');
+            let $row = $(this).closest('tr'); // Guardar referencia a la fila
+
+            Swal.fire({
+                title: '¿Eliminar cliente?',
+                text: 'Esta acción no se puede deshacer',
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            // Remover la fila de la tabla
+                            $row.fadeOut(400, function() {
+                                $(this).remove();
+
+                                // Verificar si quedan filas en la tabla
+                                if ($('#docs-code-table tbody tr').length === 0) {
+                                    $('#docs-code-table tbody').html(
+                                        '<tr> <
+                                        td colspan = "6"
+                                        class = "text-center text-muted" >
+                                        NO HAY DATOS DISPONIBLES < /td> <
+                                        /tr>'
+                                    );
+                                }
+                            });
+
+                            Swal.fire({
+                                type: 'success',
+                                title: '¡Eliminado!',
+                                text: response.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                type: 'error',
+                                title: 'Error',
+                                text: 'No se pudo eliminar el cliente',
+                                showConfirmButton: true
+                            });
+                        }
+                    });
+                }
+            });
+        });
     </script>
 @endsection
 @endsection

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('garita_controls', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('garita_id');
             $table->timestamps();
         });
     }

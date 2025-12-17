@@ -39,6 +39,27 @@ class ClienteCodigoController extends Controller
      */
     public function store(Request $request)
     {
+        // Validación
+        $request->validate([
+            'tipo_documento' => 'required|in:1,2', // 1=DNI, 2=RUC
+            'documento' => [
+                'required',
+                'numeric',
+                'unique:clientes_codigo,documento', // documento único en la tabla
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->tipo_documento == 1 && strlen($value) != 8) {
+                        $fail('El DNI debe tener 8 dígitos.');
+                    }
+                    if ($request->tipo_documento == 2 && strlen($value) != 11) {
+                        $fail('El RUC debe tener 11 dígitos.');
+                    }
+                }
+            ],
+            'nombre' => 'required|string|max:255',
+        ], [
+            'documento.unique' => 'Este cliente ya tiene un código asignado.'
+        ]);
+
         ClienteCodigo::create([
             'codigo' => $this->generarCodigoUnico(),
             'documento' => $request->documento,
@@ -74,16 +95,35 @@ class ClienteCodigoController extends Controller
     {
         $codigo = ClienteCodigo::findOrFail($id);
 
+        $request->validate([
+            'tipo_documento' => 'required|in:1,2', // 1=DNI, 2=RUC
+            'documento' => [
+                'required',
+                'numeric',
+                Rule::unique('clientes_codigo', 'documento')->ignore($codigo->id),
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->tipo_documento == 1 && strlen($value) != 8) {
+                        $fail('El DNI debe tener 8 dígitos.');
+                    }
+                    if ($request->tipo_documento == 2 && strlen($value) != 11) {
+                        $fail('El RUC debe tener 11 dígitos.');
+                    }
+                }
+            ],
+            'nombre' => 'required|string|max:255',
+        ], [
+            'documento.unique' => 'Este cliente ya tiene un código asignado.'
+        ]);
+
         $codigo->tipo_documento = $request->tipo_documento;
         $codigo->documento = strtoupper($request->documento);
         $codigo->nombre = strtoupper($request->nombre);
 
         $codigo->save();
 
-        return redirect()
-            ->route('clientescodigo.index')
-            ->with('success', 'Código actualizado correctamente');
+        return redirect()->route('clientescodigo.index')->with('success', 'Código actualizado correctamente');
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -126,5 +166,11 @@ class ClienteCodigoController extends Controller
             ->orWhere('documento', 'like', '%' . $request->search_string . '%')
             ->orderBy('created_at', 'desc')->get();
         return view('clientescodigo.search-results', compact('clientes'));
+    }
+
+    public function validarDocumento(Request $request)
+    {
+        $exists = ClienteCodigo::where('documento', $request->documento)->exists();
+        return response()->json(['exists' => $exists]);
     }
 }

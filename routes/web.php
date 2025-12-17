@@ -246,6 +246,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/chats/start', [ChatController::class, 'startChat'])->name('chats.start'); // Route to start a new chat
     Route::get('/users/search', [UserController::class, 'search'])->name('users.search');
 
+    Route::post('/clientescodigo/validar-documento', [ClienteCodigoController::class, 'validarDocumento'])->name('clientescodigo.validarDocumento');
 
     Route::get('/codigos-clientes', [ClienteCodigoController::class, 'index'])->name('clientescodigo.index');
     Route::post('/codigos/guardar', [ClienteCodigoController::class, 'store'])->name('clientescodigo.guardar');

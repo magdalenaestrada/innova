@@ -23,6 +23,8 @@ use App\Http\Controllers\AbonadoController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClienteCodigoController;
+use App\Http\Controllers\ControlGaritaController;
+use App\Http\Controllers\DetalleControlGaritaController;
 use App\Http\Controllers\InventarioingresoController;
 use App\Http\Controllers\InventariosalidaController;
 use App\Http\Controllers\ProductosFamiliaController;
@@ -248,18 +250,20 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::post('/clientescodigo/validar-documento', [ClienteCodigoController::class, 'validarDocumento'])->name('clientescodigo.validarDocumento');
 
+    //GENERATE UNIQUE CODE BY NUMDOC
     Route::get('/codigos-clientes', [ClienteCodigoController::class, 'index'])->name('clientescodigo.index');
     Route::post('/codigos/guardar', [ClienteCodigoController::class, 'store'])->name('clientescodigo.guardar');
     Route::get('/codigos/search', [ClienteCodigoController::class, 'searchCodigo'])->name('clientescodigo.search');
     Route::put('/codigos/editar/{id}', [ClienteCodigoController::class, 'update'])->name('clientescodigo.editar');
-    Route::delete('/codigos/{codigoId}', [ClienteCodigoController::class, 'destroy'])
-        ->name('clientescodigo.destroy');
+    Route::delete('/codigos/{codigoId}', [ClienteCodigoController::class, 'destroy'])->name('clientescodigo.destroy');
 
     //DAILY ROTATIONS PRODUCTS 
     Route::get('/dailyrotation/{id}/products', [ProductoController::class, 'dailyrotation'])->name('product.dailyrotation');
 
-
-
+    //GARITA CONTROLS
+    Route::get('/controlgarita/in', [DetalleControlGaritaController::class, 'indexE'])->name('controlgarita.entrada.index');
+    Route::get('/controlgarita/out', [DetalleControlGaritaController::class, 'indexS'])->name('controlgarita.salida.index');
+    Route::post('/controlgarita/guardar', [DetalleControlGaritaController::class, 'store'])->name('controlgarita.guardar');
 
     Route::get('/salidascuentas/datatable', [TsSalidacuentaController::class, 'datatable'])->name('salidascuentas.datatable');
 });

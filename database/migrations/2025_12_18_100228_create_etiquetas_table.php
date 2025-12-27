@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('garita_controls', function (Blueprint $table) {
+        Schema::create('etiquetas', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('garita_id');
+            $table->string('nombre');
+            $table->text('descripcion')->nullable();
+            $table->char('color', 7)->nullable();
             $table->timestamps();
         });
     }
@@ -23,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('garita_controls');
+        Schema::dropIfExists('etiquetas');
     }
 };

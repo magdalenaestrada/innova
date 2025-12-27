@@ -689,13 +689,13 @@ return [
         [
             'text' => 'ENTRADAS',
             'icon_color' => 'blue',
-            'url' => '/garita',
+            'url' => '/controlgarita/in',
         //    'can' => 'view garita',
         ],
         [
             'text' => 'SALIDAS',
             'icon_color' => 'green',
-            'url' => '/garita',
+            'url' => '/controlgarita/out',
         //    'can' => 'view garita',
         ],
 

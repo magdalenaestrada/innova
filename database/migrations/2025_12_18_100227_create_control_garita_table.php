@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('documentacion_legal', function (Blueprint $table): void {
+        Schema::create('control_garita', function (Blueprint $table) {
             $table->id();
-            $table->char(column: 'documento_identificacion', length: 12);
-            $table->char(column: 'codigo_documento', length: 6);
+            $table->string('turno');
+            $table->date('fecha');
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('documentacion_legal');
+        Schema::dropIfExists('control_garita');
     }
 };

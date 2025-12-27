@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreign('responsable_id')->references('id')->on('users')->onDelete('set null');
 
             $table->string('contacto')->nullable();
-            $table->timestamps();
+            $table->timestamps(); 
         });
     }
 

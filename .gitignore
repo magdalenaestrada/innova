@@ -19,3 +19,5 @@ yarn-error.log
 /.vscode
 *.zip
 *.rar
+/pie.phar
+/public/images/Se\ Encendio\ el\ Beeper.mp3

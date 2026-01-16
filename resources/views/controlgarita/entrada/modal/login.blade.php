@@ -1,9 +1,44 @@
 @push('css')
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css" />
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css" rel="stylesheet">
     <style>
-        .btn {
+        #ModalLogin .btn {
             border-radius: 6px
+        }
+
+        #ModalLogin .ts-control {
+            height: calc(1.5em + .75rem + 2px);
+            padding: .375rem .75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #495057;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+        }
+
+        /* Input interno */
+        #ModalLogin .ts-control input {
+            font-size: 1rem;
+            color: #495057;
+        }
+
+        /* Focus (igual a Bootstrap) */
+        #ModalLogin .ts-control.focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
+        }
+
+        /* Dropdown */
+        #ModalLogin .ts-dropdown {
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+            font-size: 0.9rem;
+        }
+
+        /* Opciones hover */
+        #ModalLogin .ts-dropdown .active {
+            background-color: #007bff;
+            color: #fff;
         }
     </style>
 @endpush
@@ -28,7 +63,8 @@
                 </div>
             </div>
             <div class="card-body">
-                <form class="crear-detalles" action="{{ route('controlgarita.guardar') }}" method="POST">
+                <form class="crear-detalles" action="{{ route('controlgarita.turno') }}"
+                    method="POST">
 
                     @csrf
                     <div class="row">
@@ -39,66 +75,67 @@
                                 <option value="0">Día 7:00 - 19:00</option>
                                 <option value="1">Noche 19:00 - 7:00</option>
                             </select>
+                            {{-- <input type="time" name="" id="" value="{{ now()->format('H:i') }}" class="form-control" disabled> --}}
                         </div>
+                        {{-- <div class="col-md-2">
+                            <label class="form-label fw-semibold invisible">Turno</label>
+                            <input type="time" name="" id="" class="form-control">
+                        </div> --}}
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Unidad</label>
-                            <input name="unidad" id="unidad" class="form-control" type="text" required>
+                            <input name="unidad" id="unidad" class="form-control" type="text"
+                                placeholder="Ej: Planta Minera Alfa Golden" required>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-semibold">Fecha</label>
-                            <input name="fecha" id="fecha" class="form-control" type="date" required>
+                            <input name="fecha" id="fecha" class="form-control" type="date" readonly>
                         </div>
                     </div>
                     <br>
-                    <div id="trabajadores-container">
-                        <div class="row trabajador-item">
-                            <div class="form mb-1 col-md-3">
-                                <label class="form-label fw-semibold">Documento</label>
-                                <input name="documento" id="documento" class="form-control" type="text"
-                                    inputmode="numeric" pattern="[0-9]*" maxlength="11"
-                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
-                            </div>
-                            <div class="form col-md-7">
-                                <label class="form-label fw-semibold">Nombre</label>
-                                <input name="nombre" id="nombre" class="form-control" type="text" required>
-                            </div>
-                            <div class="form col-md-1"></div>
-                            <div class="form col-md-1">
-                                <label class="form-label fw-semibold invisible">Acción</label>
-                                <button type="button" class="btn btn-success btn-add-trabajador">
-                                    +
-                                </button>
-                            </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Nombre</label>
+                            <select id="select-usuarios" class="tom-select" multiple
+                                autocomplete="off" required>
+                                <small class="form-text text-muted">
+                                    Puede seleccionar múltiples usuarios
+                                </small>
+                            </select>
+                            <input id="usuario" class="form-control invisible" value="{{ Auth::user()->name }}" type="text"
+                                disabled>
                         </div>
-                        <br>
-                        <div class="row">
+                    </div>
+                    <br>
+                    <div id="element-container">
+                        <div class="row element-item">
                             <div class="form mb-1 col-md-3">
                                 <label class="form-label fw-semibold">Cantidad</label>
-                                <input name="documento" id="documento" class="form-control" type="text"
-                                    inputmode="numeric" pattern="[0-9]*" required>
+                                <input name="productos[0][cantidad]" id="cantidad" class="form-control" type="number"
+                                    placeholder="Cantidad..." inputmode="numeric" pattern="[0-9]*" min="1"
+                                    step="1" value="1" required>
                             </div>
-                            <div class="form col-md-7">
+                            <div class="form col-md-8">
                                 <label class="form-label fw-semibold">Elemento</label>
-                                {{-- <input name="nombre" id="nombre" class="form-control" type="text" required> --}}
-                                <select class="form-control selectpicker" multiple data-live-search="true">
-                                    <option>Mustard</option>
-                                    <option>Ketchup</option>
-                                    <option>Relish</option>
+                                <select id="select-elemento" name="productos[0][productos_id]" class="tom-select"
+                                    autocomplete="off">
+                                    <option value="">Buscar elemento...</option>
+                                    @foreach ($productos as $producto)
+                                        <option value="{{ $producto->id }}">{{ $producto->nombre_producto }}</option>
+                                    @endforeach
                                 </select>
                             </div>
-                            <div class="form col-md-1"></div>
                             <div class="form col-md-1">
                                 <label class="form-label fw-semibold invisible">Acción</label>
-                                <button type="button" class="btn btn-success btn-add-trabajador">
+                                <button type="button" class="btn btn-success btn-add-element">
                                     +
                                 </button>
                             </div>
                         </div>
                     </div>
                     <br>
-                    <div style="display: none;">
+                    {{-- <div style="display: none;">
                         <div id="reproductor-youtube"></div>
-                    </div>
+                    </div> --}}
                     <div class="row">
                         <div class="col-md-12 text-right mt-1">
                             {{-- No olvidar quitar el onclick="reproducirAudio()" --}}
@@ -114,55 +151,146 @@
     </div>
 </div>
 @push('js')
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
 
     <script>
-        $(document).ready(() => {
-            let index = 1;
-            $('.btn-add-trabajador').on('click', function() {
-                let nuevo = `
-                    <div class="row trabajador-item">
-                        <div class="form mb-1 col-md-3">
-                            <label class="form-label fw-semibold">Documento</label>
-                            <input name="documento" id="documento" class="form-control" type="text"
-                                inputmode="numeric" pattern="[0-9]*" maxlength="11"
-                                oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
-                        </div>
-                        <div class="form col-md-8">
-                            <label class="form-label fw-semibold">Nombre</label>
-                            <input name="nombre" id="nombre" class="form-control" type="text" required>
-                        </div>
-                        <div class="form col-md-1">
-                            <label class="form-label fw-semibold invisible">Nombre</label>
-                            <button type="button" class="btn btn-success btn-remove-trabajador">
-                                -
-                            </button>
-                        </div>
-                        <div><br></div>
-                    </div>
-                `;
-
-                $('#trabajadores-container').append(nuevo);
-                index++;
-            });
-
-            $(document).on('click', '.btn-remove-trabajador', function() {
-                $(this).closest('.trabajador-item').remove();
-            });
-        });
-
         //Hora actual en input type="time"
         const inputFecha = document.getElementById("fecha");
         const now = new Date();
 
-        const year = now.getFullYear;
+        const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
 
         inputFecha.value = `${year}-${month}-${day}`;
+
+        $(() => {
+            const productosData = @json($productos ?? []);
+            const usersData = @json($users ?? []);
+
+            let elementIndex = 1;
+
+            let tomSelectInstances = [];
+
+            const selectUsuarios = new TomSelect('#select-usuarios', {
+                plugins: ['dropdown_input', 'clear_button'],
+                valueField: 'id',
+                labelField: 'name',
+                searchField: 'name',
+                placeholder: 'Buscar trabajadores...',
+                maxItems: null,
+                create: false,
+                options: usersData,
+                render: {
+                    option: function(data, escape) {
+                        return `<div>${escape(data.name)}</div>`
+                    },
+                    item: function(data, escape) {
+                        return `<div>${escape(data.name)}</div>`
+                    }
+                }
+            });
+
+            function initTomSelectElemento(element) {
+                const tomSelect = new TomSelect(element, {
+                    create: false,
+                    sortField: {
+                        field: "text",
+                        direction: "asc"
+                    },
+                    render: {
+                        option: function(data, escape) {
+                            return '<div>' + escape(data.text) + '</div>';
+                        }
+                    }
+                });
+
+                tomSelectInstances.push(tomSelect);
+                return tomSelect;
+            }
+
+            initTomSelectElemento('#select-elemento');
+
+            $('.btn-add-element').on('click', () => {
+                let optionsHTML = '<option value="">Buscar elemento...</option>';
+                productosData.forEach(function(productos) {
+                    optionsHTML +=
+                        `<option value="${productos.id}">${productos.nombre_producto}</option>`;
+                })
+
+                let newElement = `
+                    <div class="row mt-4 element-item">
+                        <div class="form mb-1 col-md-3">
+                            <label class="form-label fw-semibold">Cantidad</label>
+                            <input name="productos[${elementIndex}][cantidad]" id="cantidad" class="form-control" type="number"
+                                placeholder="Cantidad..." inputmode="numeric" pattern="[0-9]*" min="1"
+                                step="1" value="1" required>
+                        </div>
+                        <div class="form col-md-8">
+                            <label class="form-label fw-semibold">Elemento</label>
+                            <select id="select-elemento-${elementIndex}" name="productos[${elementIndex}][productos_id]" class="tom-select"
+                                autocomplete="off">
+                                ${optionsHTML}
+                            </select>
+                        </div>
+                        <div class="form col-md-1">
+                            <label class="form-label fw-semibold invisible">Acción</label>
+                            <button type="button" class="btn btn-success btn-remove-element">
+                                -
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                $('#element-container').append(newElement);
+
+                const nuevoSelect = $(`#select-elemento-${elementIndex}`)[0];
+                initTomSelectElemento(nuevoSelect);
+
+                elementIndex++;
+            });
+
+            $(document).on('click', '.btn-remove-element', function() {
+                const element = $(this).closest('.element-item');
+                element.find('input, select, textarea').prop('required', false);
+                const selectElement = element.find('select')[0];
+
+                if (selectElement && selectElement.tomSelect) {
+                    const index = tomSelectInstances.indexOf(selectElement.tomSelect);
+                    if (index > -1) {
+                        tomSelectInstances.splice(index, 1);
+                    }
+                    selectElement.tomSelect.destroy();
+                }
+
+                element.fadeOut(200, function() {
+                    $(this).remove();
+                });
+            });
+
+            // $('#ModalLogin').on('hidden.bs.modal', function() {
+            //     selectUsuarios.clear();
+            //     $('.crear-detalles')[0].reset();
+
+            //     // Eliminar elementos adicionales
+            //     $('.element-item').not(':first').each(function() {
+            //         const select = $(this).find('select')[0];
+            //         if (select && select.tomSelect) {
+            //             select.tomSelect.destroy();
+            //         }
+            //         $(this).remove();
+            //     });
+
+            //     // Resetear primer elemento
+            //     const firstSelect = $('.element-item:first select')[0];
+            //     if (firstSelect && firstSelect.tomSelect) {
+            //         firstSelect.tomSelect.clear();
+            //     }
+            //     $('.element-item:first input[type="number"]').val(1);
+
+            //     elementIndex = 1;
+            // });
+        });
 
         // Función para reproducir el archivo de audio
         // function reproducirAudio() {
@@ -173,91 +301,4 @@
         //     });
         // }
     </script>
-
-
-
-    {{-- <script>
-        $(document).ready(function() {
-            $('.buscador').select2({
-                theme: "classic"
-            });
-        });
-    </script>
-
-    <script>
-        $(document).ready(function() {
-            function isRucOrDni(value) {
-                return value.length === 8 || value.length === 11;
-            }
-
-            function buscarDocumento(url, inputId, datosId) {
-                var inputValue = $(inputId).val();
-                var tipoDocumento = inputValue.length === 8 ? 'dni' : 'ruc';
-
-                // Realizar la solicitud AJAX al controlador
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        documento: inputValue,
-                        tipo_documento: tipoDocumento
-                    },
-                    success: function(response) {
-                        console.log('1', 'API Response:', response);
-                        // Manejar la respuesta del controlador
-                        if (tipoDocumento === 'dni') {
-                            $(datosId).val(response.nombres + ' ' + response.apellidoPaterno + ' ' +
-                                response.apellidoMaterno);
-                        } else {
-                            $(datosId).val(response.razonSocial);
-                        }
-
-                        $(datosId).removeClass('is-invalid').addClass('is-valid');
-                    },
-                    error: function(xhr, status, error) {
-                        // Manejar el error de la solicitud
-                        console.log('3', xhr.responseText);
-                        $(datosId).val('');
-                        $(datosId).removeClass('is-valid').addClass('is-invalid');
-                    }
-                });
-            }
-
-            $('#documento').on('input', function() {
-                var inputLength = $(this).val().length;
-                if (inputLength === 8 || inputLength === 11) {
-                    buscarDocumento('{{ route('buscar.documento') }}', '#documento', '#nombre');
-                }
-            });
-            // Validar ruc o dni y cambiar el borde a verde al llenar los campos
-            $('#documento').off('input').on('input', function() {
-                var inputLength = $(this).val().length;
-                if (inputLength === 8 || inputLength === 11) {
-                    buscarDocumento('{{ route('buscar.documento') }}', '#documento', '#nombre');
-                }
-            });
-
-            // Cambiar el borde a verde cuando se llenen los campos datos_cliente
-            $('.datos-input').on('input', function() {
-                var value = $(this).val();
-                $(this).toggleClass('is-valid', value.trim().length > 0);
-                $(this).toggleClass('is-invalid', value.trim().length === 0);
-            });
-        });
-    </script>
-
-
-
-
-
-    @if ($errors->any())
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Error de validación',
-                html: '@foreach ($errors->all() as $error)<p>{{ $error }}</p>@endforeach',
-            });
-        </script>
-    @endif --}}
 @endpush

@@ -687,13 +687,13 @@ return [
         // 'can' => 'view garita',
         ],
         [
-            'text' => 'ENTRADAS',
+            'text' => 'CONTROL DE MOVIMIENTOS',
             'icon_color' => 'blue',
             'url' => '/controlgarita/in',
         //    'can' => 'view garita',
         ],
         [
-            'text' => 'SALIDAS',
+            'text' => 'REGISTRO DE DÍAS LIBRES',
             'icon_color' => 'green',
             'url' => '/controlgarita/out',
         //    'can' => 'view garita',

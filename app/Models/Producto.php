@@ -34,4 +34,13 @@ class Producto extends Model
         return $this->hasMany(Invsalidasrapidasdetalles::class);
     }
 
+    public function cargos() 
+    {
+        return $this->belongsToMany(
+            ControlGarita::class, 
+            'cg_cargos', 
+            'productos_id', 
+            'control_garita_id'
+        )->withPivot('cantidad');
+    }
 }

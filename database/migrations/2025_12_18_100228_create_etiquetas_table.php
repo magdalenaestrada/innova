@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('etiquetas', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
+            $table->string('nombre')->nullable();
             $table->text('descripcion')->nullable();
             $table->char('color', 7)->nullable();
             $table->timestamps();

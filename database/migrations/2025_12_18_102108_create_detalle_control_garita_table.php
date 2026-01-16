@@ -21,16 +21,13 @@ return new class extends Migration
             $table->text('ocurrencias')->nullable();
             $table->time('hora');
             $table->string('destino')->nullable();
-            $table->string('placa', 7)->unique()->nullable();
+            $table->string('placa', 7)->nullable();
+            $table->string('tipo_carga')->nullable();
             $table->string('tipo_vehiculo')->nullable();
-            // $table->unsignedBigInteger('vehiculo_id')->nullable();
-            // $table->unsignedBigInteger('trabajador_id');
             $table->unsignedBigInteger('etiqueta_id')->nullable();
             $table->unsignedBigInteger('control_garita_id')->nullable();
             $table->timestamps();
 
-            // $table->foreign('vehiculo_id')->references('id')->on('vehiculos')->onDelete('cascade');
-            // $table->foreign('trabajador_id')->references('id')->on('empleados')->onDelete('cascade');
             $table->foreign('etiqueta_id')->references('id')->on('etiquetas')->onDelete('cascade');
             $table->foreign('control_garita_id')->references('id')->on('control_garita')->onDelete('cascade');
         });

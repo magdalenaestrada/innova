@@ -21,22 +21,19 @@ class DetalleControlGarita extends Model
         'hora',
         'destino',
         'placa',
+        'tipo_carga',
         'tipo_vehiculo',
-        // 'vehiculos_id',
-        // 'trabajador_id',
         'etiqueta_id',
         'control_garita_id',
+        'usuario_id',
     ];
 
-    // public function vehiculo()
-    // {
-    //     return $this->belongsTo(Vehiculo::class, foreignKey: 'vehiculos_id');
-    // }
+    protected $appends = ['trae_carga'];
 
-    // public function trabajador()
-    // {
-    //     return $this->belongsTo(Empleado::class, foreignKey: 'trabajador_id');
-    // }   
+    public function getTraeCargaAttribute()
+    {
+        return !empty($this->destino) || !empty($this->tipo_carga ? 1 : 0);
+    }
 
     public function etiqueta()
     {
@@ -46,5 +43,10 @@ class DetalleControlGarita extends Model
     public function controlGarita()
     {
         return $this->belongsTo(ControlGarita::class, foreignKey: 'control_garita_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, foreignKey: 'usuario_id');
     }
 }

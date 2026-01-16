@@ -60,13 +60,29 @@ class User extends Authenticatable
         return $this->belongsTo(Garita::class, 'garita_id');
     }
 
-    public function adminlte_desc(){
+    public function adminlte_desc()
+    {
         return "Miembro Alfa";
     }
 
 
-    public function empleado(){
+    public function empleado()
+    {
         return $this->belongsTo(Empleado::class);
     }
 
+    public function user_cg()
+    {
+        return $this->hasMany(ControlGarita::class, foreignKey: 'usuario_id');
+    }
+
+    public function user_dcg()
+    {
+        return $this->hasMany(DetalleControlGarita::class, foreignKey: 'usuario_id');
+    }
+
+    // public function agente()
+    // {
+    //     return $this->hasMany(CgAgentes::class, foreignKey: 'usuarios_id');
+    // }
 }

@@ -2,12 +2,56 @@
 @push('css')
     <link rel="stylesheet" href="{{ asset('css/areas.css') }}">
     <link rel="stylesheet" href="{{ asset('css/productos.css') }}">
+    <style>
+        .badge-custom-style {
+            font-size: 1vh;
+            padding: 0.4em 0.4em;
+            border-radius: 0.25rem;
+        }
+
+        .tr-etiqueta {
+            position: relative;
+            background-color: var(--row-bg, transparent);
+            transition: background-color 0.2s ease;
+        }
+
+        .tr-etiqueta::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 6px;
+            height: 100%;
+            background-color: var(--row-color, transparent);
+            border-radius: 4px 0 0 4px;
+        }
+
+        .tr-etiqueta:hover {
+            background-color: var(--row-hover, rgba(0,0,0,0.03));
+        }
+    </style>
 @endpush
 
 @section('content')
     <div class="container">
 
         <br>
+        {{-- Alertas --}}
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i> {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        @endif
+
+        {{-- Cabecera --}}
         <div class="row d-flex justify-content-between align-items-center">
             {{-- audio --}}
             {{-- <audio id="miAudio">
@@ -17,138 +61,177 @@
             <div class="loader">
                 {{ __('GARITA DE CONTROL') }}
             </div>
-            <div class="text-right col-md-6" id="turno-active-btn">
-                <a class="" href="#" data-toggle="modal" data-target="#ModalCreate">
-                    <button class="button-create">
-                        {{ __('REGISTRAR ENTRADA') }}
-                    </button>
-                </a>
-            </div>
-            {{-- Cambiar boton cuando inicie sesión --}}
             <div class="text-right col-md-6" id="turno-btn">
-                <a class="" href="#" data-toggle="modal" data-target="#ModalLogin">
-                    <button class="button-create">
-                        {{ __('INICIAR TURNO') }}
+                @if ($turnoActivo)
+                    <a href="#" data-toggle="modal" data-target="#ModalCreate">
+                        <button class="button-create">
+                            <i class="fas fa-sign-in-alt"></i> {{ __('REGISTRAR MOVIMIENTO') }}
+                        </button>
+                    </a>
+                    <button class="btn btn-danger" id="btn-endturn">
+                        <i class="fas fa-stop"></i> {{ __('FINALIZAR TURNO') }}
                     </button>
-                </a>
+                @else
+                    <a class="" href="#" data-toggle="modal" data-target="#ModalLogin">
+                        <button class="button-create">
+                            {{ __('INICIAR TURNO') }}
+                        </button>
+                    </a>
+                @endif
+            </div>
+            <div class="text-right col-md-6" id="turno-container">
             </div>
         </div>
         <br>
-
-        {{-- Mostrar cuando inicie turno --}}
-        <div class="row justify-content-center" id="turno-active-card">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row justify-content-between" style="margin-inline: 0">
-                            <div class="form">
-                                <label class="form-label fw-semibold">UNIDAD :</label>
-                                <label class="form-label fw-semibold">Planta Minera Alfa Golden</label>
-                            </div>
-                            <div class="form">
-                                <label class="form-label fw-semibold">TURNO :</label>
-                                <label class="form-label fw-semibold">Día</label>
-                            </div>
-                            <div class="form">
-                                <label class="form-label fw-semibold">HORARIO :</label>
-                                <label class="form-label fw-semibold">7:00 - 15:00</label>
-                            </div>
+        {{-- Card de Turno Activo --}}
+        @if ($turnoActivo)
+            <div class="row justify-content-center mb-3">
+                <div class="col-md-12">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-clock"></i> Turno Activo - {{ Auth::user()->name }}
+                            </h6>
                         </div>
-                        <br>
-                        <div class="row">
-                            <div class="form col-md-12">
-                                <label class="form-label fw-semibold">AGENTES :</label>
-                                <label class="form-label fw-semibold">Jose Coronado</label> -
-                                <label class="form-label fw-semibold">Manuel Sazuedra</label>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>UNIDAD:</strong><br>
+                                    {{ $turnoActivo->unidad }}
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>TURNO:</strong><br>
+                                    {{ $turnoActivo->turno == 0 ? 'Día (7:00 - 19:00)' : 'Noche (19:00 - 7:00)' }}
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>FECHA:</strong><br>
+                                    {{ \Carbon\Carbon::parse($turnoActivo->fecha)->format('d/m/Y') }}
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>HORA INICIO:</strong><br>
+                                    {{ $turnoActivo->hora_inicio ? \Carbon\Carbon::parse($turnoActivo->hora_inicio)->format('H:i') : 'N/A' }}
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <strong>CARGOS/ELEMENTOS:</strong><br>
+                                    @if ($turnoActivo->cargos->count() > 0)
+                                        @foreach ($turnoActivo->cargos as $cargo)
+                                            <span class="badge badge-info">
+                                                {{ $cargo->pivot->cantidad }}x {{ $cargo->nombre_producto }}
+                                            </span>
+                                        @endforeach
+                                    @else
+                                        <span class="text-muted">Sin elementos</span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
+        @endif
+        {{-- Tabla --}}
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="row">
+                    <div class="row align-items-center mb-3">
                         <div class="col-md-6">
-                            <input style="margin: 20px 0 0 20px" type="text" name="searcht" id="searcht"
+                            <input style="margin: 20px 0 0 20px" type="text" name="searcht" id="cg-search"
                                 class="input-search form-control" placeholder="BUSCAR AQUÍ...">
                         </div>
                     </div>
+                    <div class="col-md-6 text-left" style="margin: 20px 0 0 20px;">
+                        <div class="btn-group">
+                            <button id="bt-filter-table-in" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-sign-in-alt"></i> ENTRADA
+                            </button>
+                            <button id="bt-filter-table-out" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-sign-out-alt"></i> SALIDA
+                            </button>
+                            <button class="btn btn-sm btn-info btn-lbl-clr-cliente" 
+                                data-toggle="modal" data-target="#ModalEtiqueta">
+                                <i class="fas fa-tag"></i> Etiquetas
+                            </button>
+                        </div>
+                        @include('controlgarita.entrada.modal.etiqueta')
+                    </div>
                     <div class="card-body">
-                        <table id="docs-code-table" class="table table-striped">
+                        <table id="det-control-garita-table" class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th scope="col">
-                                        {{ __('ID') }}
-                                    </th>
-                                    <th scope="col">
-                                        {{ __('HORA') }}
-                                    </th>
-                                    <th scope="col">
-                                        {{ __('TIPO') }}
-                                    </th>
-                                    <th scope="col">
-                                        {{ __('IDENTIFICACION') }}
-                                    </th>
-                                    <th scope="col">
-                                        {{ __('NOMBRE') }}
-                                    </th>
-                                    <th scope="col">
-                                        {{ __('OCURRENCIA') }}
-                                    </th>
-                                    <th scope="col">
-                                        {{ __('ACCION') }}
-                                    </th>
+                                    <th scope="col"> {{ __('ID') }} </th>
+                                    <th scope="col"> {{ __('E/S') }} </th>
+                                    <th scope="col"> {{ __('HORA') }} </th>
+                                    <th scope="col"> {{ __('TIPO') }} </th>
+                                    <th scope="col"> {{ __('IDENTIFICACION') }} </th>
+                                    <th scope="col"> {{ __('NOMBRE') }} </th>
+                                    <th scope="col"> {{ __('OCURRENCIA') }} </th>
+                                    <th scope="col"> {{ __('ACCION') }} </th>
                                 </tr>
                             </thead>
 
                             <tbody style="font-size: 13px">
                                 @if (count($detalles) > 0)
                                     @foreach ($detalles as $detalle)
-                                        <tr>
+                                        @php
+                                            $ultimoTurnoActivo =
+                                                $turnoActivo && $detalle->control_garita_id == $turnoActivo->id;
+                                            $color = $detalle->etiqueta ? $detalle->etiqueta->color : '#ffffff';
+                                        @endphp
+                                        <tr class="
+                                            {{ $ultimoTurnoActivo ? 'turno-actual' : 'turno-pasado' }}
+                                            {{ $color ? 'tr-etiqueta' : '' }}
+                                            " data-tipo="{{ $detalle->tipo_movimiento }}"
+                                            style="{{ $color ? "--row-color: {$color}; --row-bg: {$color}15; --row-hover: {$color}25;" : '' }}">
                                             <td scope="row">
                                                 {{ $detalle->id }}
                                             </td>
                                             <td scope="row">
-                                                {{ $detalle->hora }}
+                                                @if ($detalle->tipo_movimiento === 'E')
+                                                    <span class="badge badge-success badge-custom-style">ENTRADA</span>
+                                                @else
+                                                    <span class="badge badge-secondary badge-custom-style">SALIDA</span>
+                                                @endif
+                                            </td>
+                                            <td scope="row">
+                                                {{ $detalle->hora ? \Carbon\Carbon::parse($detalle->hora)->format('H:i') : 'N/A' }}
                                             </td>
                                             <td scope="row">
                                                 @if ($detalle->tipo_entidad === 'V')
-                                                    <span class="badge badge-primary">VEHÍCULO</span>
+                                                    <span class="badge badge-secondary badge-custom-style">VEHÍCULO</span>
                                                 @else
-                                                    <span class="badge badge-info">PERSONA</span>
+                                                    <span class="badge badge-primary badge-custom-style">PERSONA</span>
                                                 @endif
                                             </td>
                                             <td scope="row">
                                                 @if ($detalle->placa)
-                                                    {{ strtoupper($detalle->placa) }}
+                                                    <span class="badge badge-secondary badge-custom-style">{{ strtoupper($detalle->placa) }}</span>
                                                 @else
-                                                    {{ strtoupper($detalle->documento) }}
+                                                    <span class="badge badge-primary badge-custom-style">{{ strtoupper($detalle->documento) }}</span>
                                                 @endif
                                             </td>
                                             <td scope="row">
                                                 {{ strtoupper($detalle->nombre) }}
                                             </td>
                                             <td scope="row">
-                                                {{ Str::limit(strtoupper($detalle->ocurrencias), 20) }}
+                                                {{ Str::limit(strtoupper($detalle->ocurrencias), 50) }}
                                             </td>
-
                                             <td class="btn-group align-items-center">
-                                                <button class="btn btn-sm btn-warning btn-editar-detalle"
-                                                    data-toggle="modal" data-target="#ModalEdit{{ $detalle->id }}">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
+                                                @if ($ultimoTurnoActivo)
+                                                    <button class="btn btn-sm btn-warning btn-editar-detalle"
+                                                        data-toggle="modal" data-target="#ModalEdit{{ $detalle->id }}">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
 
-                                                {{-- @include('clientescodigo.modal.edit', [
-                                                    'id' => $cliente->id,
-                                                ]) --}}
-
-                                                {{-- <button class="btn btn-sm btn-danger btn-eliminar-cliente"
-                                                    data-url="{{ route('clientescodigo.destroy', $cliente->id) }}">
-                                                    <i class="fa fa-trash"></i>
-                                                </button> --}}
+                                                    @include('controlgarita.entrada.modal.edit', ['detalle' => $detalle])
+                                                @else
+                                                    <button class="btn btn-sm btn-secondary" disabled
+                                                        title="No se puede editar turnos pasados">
+                                                        <i class="fas fa-lock"></i>
+                                                    </button>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -166,102 +249,112 @@
             </div>
         </div>
     </div>
-    @include('controlgarita.entrada.modal.create')
     @include('controlgarita.entrada.modal.login')
+    @if($turnoActivo)
+        @include('controlgarita.entrada.modal.create')
+    @endif
+@endsection
 
 @section('js')
     <script type="text/javascript">
-        $(document).ready(function() {
-            const $element = {
-                btn: $('#turno-btn'),
-                active: $('#turno-active-btn'),
-                card: $('#turno-active-card')
-            };
+        $(() => {
+            $('#cg-search').on('input', function(e) {
+                e.preventDefault();
+                let search_string = $(this).val();
+                $.ajax({
+                    url: "{{ route('detcontrolgarita.search') }}",
+                    method: 'GET',
+                    data: {
+                        search_string: search_string
+                    },
+                    success: function(response) {
+                        console.log('1', 'API Response:', response);
+                        $('#det-control-garita-table tbody').html(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', error);
+                    }
+                });
+            });
+            
+            $('#btn-endturn').on('click', function() {
 
-            function setTurnoState(active) {
-                $element.btn.toggle(!active);
-                $element.active.toggle(active);
-                $element.card.toggle(active);
+                Swal.fire({
+                    title: '¿Finalizar turno?',
+                    text: 'Se cerrará tu turno actual y no podrás registrar más ocurrencias',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, finalizar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                }).then((result) => {
+                    console.log(result);
+                    if (result.value) {
+                        console.log('Confirmado');
+                        $.ajax({
+                            url: "{{ route('controlgarita.finalizar') }}",
+                            type: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                Swal.fire({
+                                    type: 'success',
+                                    title: 'Turno finalizado',
+                                    text: 'Tu turno ha sido cerrado exitosamente',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            },
+                            error: function(xhr) {
+                                Swal.fire({
+                                    type: 'error',
+                                    title: 'Error',
+                                    text: xhr.responseJSON?.message ||
+                                        'Error al finalizar turno',
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
+            function filtrarTabla(tipo) {
+                $('#det-control-garita-table tbody tr').each(function () {
+                    const tipoFila = $(this).data('tipo');
+
+                    if (tipoFila === tipo) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
             }
 
-            setTurnoState(false); // Estado inicial: turno no iniciado
+            $('#bt-filter-table-in').on('click', function() {
+                filtrarTabla('E');
+            });
+            $('#bt-filter-table-out').on('click', function() {
+                filtrarTabla('S');
+            });
 
-            $element.btn.click(() => setTurnoState(true));
-        });
-
-        // $(document).ready(function() {
-        //     $('#searcht').on('input', function(e) {
-        //         e.preventDefault();
-        //         let search_string = $(this).val();
-        //         $.ajax({
-        //             url: "{{ route('clientescodigo.search') }}",
-        //             method: 'GET',
-        //             data: {
-        //                 search_string: search_string
-        //             },
-        //             success: function(response) {
-        //                 console.log('1', 'API Response:', response);
-        //                 $('#docs-code-table tbody').html(response);
-        //             },
-        //             error: function(xhr, status, error) {
-        //                 console.error('AJAX Error:', error);
-        //             }
-        //         });
-        //     });
-        // });
-
-        // $(document).on('click', '.btn-eliminar-cliente', function() {
-        //     let url = $(this).data('url');
-        //     let $row = $(this).closest('tr'); // Guardar referencia a la fila
-
-        //     Swal.fire({
-        //         title: '¿Eliminar cliente?',
-        //         text: 'Esta acción no se puede deshacer',
-        //         type: 'warning',
-        //         showCancelButton: true,
-        //         confirmButtonText: 'Sí, eliminar',
-        //         cancelButtonText: 'Cancelar'
-        //     }).then((result) => {
-        //         if (result.value) {
-        //             $.ajax({
-        //                 url: url,
-        //                 type: 'DELETE',
-        //                 data: {
-        //                     _token: '{{ csrf_token() }}'
-        //                 },
-        //                 success: function(response) {
-        //                     // Remover la fila de la tabla
-        //                     $row.fadeOut(400, function() {
-        //                         $(this).remove();
-
-        //                         // Verificar si quedan filas en la tabla
-        //                         if ($('#docs-code-table tbody tr').length === 0) {
-        //                             $('#docs-code-table tbody').html(
-        //                                 '<tr><td colspan="6" class="text-center text-muted">NO HAY DATOS DISPONIBLES</td></tr>'
-        //                             );
-        //                         }
-        //                     });
-
-        //                     Swal.fire({
-        //                         type: 'success',
-        //                         title: '¡Eliminado!',
-        //                         text: response.message,
-        //                         timer: 1500,
-        //                         showConfirmButton: false
-        //                     });
-        //                 },
-        //                 error: function(xhr, status, error) {
-        //                     Swal.fire({
-        //                         type: 'error',
-        //                         title: 'Error',
-        //                         text: 'No se pudo eliminar el cliente',
-        //                         showConfirmButton: true
-        //                     });
-        //                 }
-        //             });
-        //         }
-        //     });
-        // });
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 1500);
+        })
     </script>
-@endsection
+    @if (session('error'))
+        <script>
+            $(document).ready(function() {
+                Swal.fire({
+                    type: 'error',
+                    title: 'Error',
+                    text: "{{ session('error') }}"
+                });
+            });
+        </script>
+    @endif
 @endsection

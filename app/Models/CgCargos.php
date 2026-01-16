@@ -12,7 +12,7 @@ class CgCargos extends Model
     protected $table = 'cg_cargos';
 
     protected $fillable = [
-        'nombre',
+        'cantidad',
         'productos_id',
         'control_garita_id',
     ];

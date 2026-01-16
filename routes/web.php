@@ -38,6 +38,7 @@ use App\Http\Controllers\InvherramientasController;
 use App\Http\Controllers\PesoController;
 use App\Http\Controllers\PosicionController;
 use App\Http\Controllers\EmpleadoController;
+use App\Http\Controllers\EtiquetaController;
 use App\Http\Controllers\LqAdelantoController;
 use App\Http\Controllers\LqClienteController;
 use App\Http\Controllers\LqDevolucionController;
@@ -261,9 +262,18 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/dailyrotation/{id}/products', [ProductoController::class, 'dailyrotation'])->name('product.dailyrotation');
 
     //GARITA CONTROLS
-    Route::get('/controlgarita/in', [DetalleControlGaritaController::class, 'indexE'])->name('controlgarita.entrada.index');
-    Route::get('/controlgarita/out', [DetalleControlGaritaController::class, 'indexS'])->name('controlgarita.salida.index');
-    Route::post('/controlgarita/guardar', [DetalleControlGaritaController::class, 'store'])->name('controlgarita.guardar');
+    Route::get('/controlgarita', [DetalleControlGaritaController::class, 'index'])->name('detcontrolgarita.index');
+    Route::post('/controlgarita/guardar', [DetalleControlGaritaController::class, 'store'])->name('detcontrolgarita.guardar');
+    Route::put('/controlgarita/editar/{id}', [DetalleControlGaritaController::class, 'update'])->name('detcontrolgarita.editar');
+    Route::get('/controlgarita/search', [DetalleControlGaritaController::class, 'searchCodigo'])->name('detcontrolgarita.search');
+
+    Route::get('/controlgarita', [ControlGaritaController::class, 'index'])->name('controlgarita.index');
+    Route::post('/controlgarita/turno', [ControlGaritaController::class, 'store'])->name('controlgarita.turno');
+    Route::post('/controlgarita/finalizar', [ControlGaritaController::class, 'endTurn'])->name('controlgarita.finalizar');
+    Route::get('/controlgarita/turno-activo', [ControlGaritaController::class, 'getTurnoActivo'])->name('controlgarita.turno-activo');
+
+    Route::post('/controlgarita/etiqueta', [EtiquetaController::class, 'store'])->name('controlgarita.etiqueta.store');
+    Route::put('/controlgarita/etiqueta/{id}', [EtiquetaController::class, 'update'])->name('controlgarita.etiqueta.update');
 
     Route::get('/salidascuentas/datatable', [TsSalidacuentaController::class, 'datatable'])->name('salidascuentas.datatable');
 });

@@ -17,14 +17,14 @@ class DetalleControlGaritaController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        // $this->middleware('permission:view registro', ['only' => ['indexE', 'indexS']]);
-        // $this->middleware('permission:edit registro', ['only' => ['update']]);
+        $this->middleware('permission:create cg-register', ['only' => ['store']]);
+        $this->middleware('permission:edit cg-register', ['only' => ['update']]);
     }
 
     /**
      * Display a listing of the resource.
      */
-    public function indexE()
+    public function index()
     {
         $ultimoTurno = ControlGarita::where('usuario_id', Auth::id())
             ->orderBy('id', 'desc')
@@ -49,7 +49,7 @@ class DetalleControlGaritaController extends Controller
                 $q->where('nombre', 'like', 'garita%');
             })->get();
         
-        return view('controlgarita.entrada.index', compact(
+        return view('controlgarita.index', compact(
             'detalles',
             'controlGarita',
             'productos',
@@ -101,6 +101,12 @@ class DetalleControlGaritaController extends Controller
                 ->where('estado', 'activo')
                 ->latest('id')
                 ->first();
+                
+            // if ($turnoActivo) {
+            //     $this->authorize('create', $turnoActivo);
+            // } else {
+            //     return redirect()->back()->with('error', 'No tienes un turno activo para registrar el detalle.');
+            // }
 
             if (!$turnoActivo) {
                 return redirect()->back()->with('error', 'No tienes un turno activo para registrar el detalle.');
@@ -123,7 +129,7 @@ class DetalleControlGaritaController extends Controller
                 'usuario_id' => $user,
             ]);
 
-            // $ruta = $request->tipo_movimiento === 'E' ? 'controlgarita.entradas.index' : 'controlgarita.salidas.index';
+            // $ruta = $request->tipo_movimiento === 'E' ? 'controlgarita.index' : 'controlgarita.salidas.index';
             // $mensaje = $request->tipo_movimiento === 'E' ? 'Entrada registrada exitosamente.' : 'Salida registrada exitosamente.';
 
             // return redirect()->back()->with('success', $mensaje);
@@ -212,6 +218,6 @@ class DetalleControlGaritaController extends Controller
         $detalleSearch = DetalleControlGarita::where('nombre', 'like', '%' . $request->search_string . '%')
             ->orWhere('documento', 'like', '%' . $request->search_string . '%')
             ->orderBy('created_at', 'desc')->get();
-        return view('controlgarita.entrada.index', compact('detalleSearch'));
+        return view('controlgarita.index', compact('detalleSearch'));
     }
 }

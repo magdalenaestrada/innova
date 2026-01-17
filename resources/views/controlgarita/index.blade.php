@@ -61,7 +61,36 @@
             <div class="loader">
                 {{ __('GARITA DE CONTROL') }}
             </div>
+            {{-- @php
+                $user = Auth::user();
+                $tActivoUser = \App\Models\ControlGarita::where('usuario_id', $user->id)->where('estado','activo')->first();
+                $canRegisterMovement = $tActivoUser !== null && $user->can('create', $tActivoUser); // usa policy
+            @endphp --}}
             <div class="text-right col-md-6" id="turno-btn">
+                {{-- @if ($turnoActivo)
+                    @if($canRegisterMovement)
+                        <a href="#" data-toggle="modal" data-target="#ModalCreate">
+                            <button class="button-create">
+                                <i class="fas fa-sign-in-alt"></i> {{ __('REGISTRAR MOVIMIENTO') }}
+                            </button>
+                        </a>
+                    @else
+                        <button class="button-create" disabled title="Debes iniciar tu turno o no tienes permiso para registrar">
+                            <i class="fas fa-sign-in-alt"></i> {{ __('REGISTRAR MOVIMIENTO') }}
+                        </button>
+                        <small class="d-block text-muted mt-1">Inicia tu turno o solicita permiso al responsable.</small>
+                    @endif
+
+                    <button class="btn btn-danger" id="btn-endturn">
+                        <i class="fas fa-stop"></i> {{ __('FINALIZAR TURNO') }}
+                    </button>
+                @else
+                    <a class="" href="#" data-toggle="modal" data-target="#ModalLogin">
+                        <button class="button-create">
+                            {{ __('INICIAR TURNO') }}
+                        </button>
+                    </a>
+                @endif --}}
                 @if ($turnoActivo)
                     <a href="#" data-toggle="modal" data-target="#ModalCreate">
                         <button class="button-create">
@@ -155,12 +184,13 @@
                                 <i class="fas fa-tag"></i> Etiquetas
                             </button>
                         </div>
-                        @include('controlgarita.entrada.modal.etiqueta')
+                        @include('controlgarita.modal.etiqueta')
                     </div>
                     <div class="card-body">
                         <table id="det-control-garita-table" class="table table-hover">
                             <thead>
                                 <tr>
+                                    <th scope="col"> {{ __('') }} </th>
                                     <th scope="col"> {{ __('ID') }} </th>
                                     <th scope="col"> {{ __('E/S') }} </th>
                                     <th scope="col"> {{ __('HORA') }} </th>
@@ -219,19 +249,25 @@
                                                 {{ Str::limit(strtoupper($detalle->ocurrencias), 50) }}
                                             </td>
                                             <td class="btn-group align-items-center">
-                                                @if ($ultimoTurnoActivo)
+                                                <button class="btn btn-sm btn-warning btn-editar-detalle"
+                                                    data-toggle="modal" data-target="#ModalEdit{{ $detalle->id }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+
+                                                @include('controlgarita.modal.edit', ['detalle' => $detalle])
+                                                {{-- @if ($ultimoTurnoActivo)
                                                     <button class="btn btn-sm btn-warning btn-editar-detalle"
                                                         data-toggle="modal" data-target="#ModalEdit{{ $detalle->id }}">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
 
-                                                    @include('controlgarita.entrada.modal.edit', ['detalle' => $detalle])
+                                                    @include('controlgarita.modal.edit', ['detalle' => $detalle])
                                                 @else
                                                     <button class="btn btn-sm btn-secondary" disabled
                                                         title="No se puede editar turnos pasados">
                                                         <i class="fas fa-lock"></i>
                                                     </button>
-                                                @endif
+                                                @endif --}}
                                             </td>
                                         </tr>
                                     @endforeach
@@ -249,9 +285,9 @@
             </div>
         </div>
     </div>
-    @include('controlgarita.entrada.modal.login')
+    @include('controlgarita.modal.login')
     @if($turnoActivo)
-        @include('controlgarita.entrada.modal.create')
+        @include('controlgarita.modal.create')
     @endif
 @endsection
 

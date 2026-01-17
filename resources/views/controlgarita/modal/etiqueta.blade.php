@@ -156,48 +156,6 @@
                                 timer: 1200,
                                 showConfirmButton: false
                             });
-
-                            // $.ajax({
-                            //     url: "{{ route('controlgarita.etiqueta.show') }}",
-                            //     method: 'GET',
-                            //     success: function (data) {
-                            //         $tbody.empty();
-
-                            //         if( data.length === 0) {
-                            //             $tbody.prepend(`
-                            //                 <tr>
-                            //                     <td colspan="9" class="text-center text-muted">
-                            //                         {{ __('NO HAY DATOS DISPONIBLES') }}
-                            //                     </td>
-                            //                 </tr>
-                            //             `);
-                            //         } else {
-                            //             data.forEach(etiqueta => {
-                            //                 $tbody.prepend(`
-                            //                     <tr>
-                            //                         <td scope="row">
-                            //                             ${etiqueta.id}
-                            //                         </td>
-                            //                         <td scope="row">
-                            //                             ${etiqueta.nombre}
-                            //                         </td>
-                            //                         <td scope="row">
-                            //                             <span style="background-color: ${etiqueta.color}; width: 20px; height: 20px; display: inline-block; border-radius:4px;"></span>
-                            //                         </td>
-                            //                     </tr>
-                            //                 `);
-                            //             });
-                            //         }
-
-                            //         $form[0].reset();
-                            //         Swal.fire({
-                            //             type: 'success',
-                            //             title: 'Etiqueta creada',
-                            //             timer: 1200,
-                            //             showConfirmButton: false
-                            //         });
-                            //     }
-                            // });
                         }
                     },
                     error: function (xhr) {

@@ -689,7 +689,7 @@ return [
         [
             'text' => 'CONTROL DE MOVIMIENTOS',
             'icon_color' => 'blue',
-            'url' => '/controlgarita/in',
+            'url' => '/controlgarita',
         //    'can' => 'view garita',
         ],
         [

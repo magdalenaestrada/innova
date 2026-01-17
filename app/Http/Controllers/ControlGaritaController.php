@@ -16,6 +16,8 @@ class ControlGaritaController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        $this->middleware('permission:start cg-turn', ['only' => ['store']]);
+        $this->middleware('permission:end cg-turn', ['only' => ['endTurn']]);
     }
 
     /**
@@ -85,12 +87,12 @@ class ControlGaritaController extends Controller
                 'usuario_id' => $user,
             ]);
 
-            // foreach ($request->usuarios_id as $usuario_id) {
-            //     CgAgentes::create([
-            //         'control_garita_id' => $controlGarita->id,
-            //         'usuarios_id' => $usuario_id,
-            //     ]);
-            // };
+            foreach ($request->usuarios_id as $usuario_id) {
+                CgAgentes::create([
+                    'control_garita_id' => $controlGarita->id,
+                    'usuarios_id' => $usuario_id,
+                ]);
+            };
 
             foreach ($request->productos as $index) {
                 CgCargos::create([
@@ -152,7 +154,7 @@ class ControlGaritaController extends Controller
             ->orderBy('id', 'desc')
             ->first();
 
-        if (!$ultimoTurno || $ultimoTurno->estado === ' finalizado') {
+        if (!$ultimoTurno || $ultimoTurno->estado === 'finalizado') {
             return redirect()->back()->with('error', 'No tienes un turno activo para finalizar.');
         }
 

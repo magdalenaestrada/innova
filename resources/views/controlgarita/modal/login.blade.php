@@ -94,13 +94,13 @@
                     <br>
                     <div class="row">
                         <div class="col-md-12">
-                            <label class="form-label fw-semibold">Nombre</label>
-                            {{-- <select id="select-usuarios" class="tom-select" multiple
+                            <label class="form-label fw-semibold">Trabajadores</label>
+                            <select id="select-usuarios" name="usuarios_id[]" class="tom-select" multiple
                                 autocomplete="off" required>
                                 <small class="form-text text-muted">
                                     Puede seleccionar múltiples usuarios
                                 </small>
-                            </select> --}}
+                            </select>
                             <input id="usuario" class="form-control" value="{{ Auth::user()->name }}" type="text"
                                 disabled>
                         </div>
@@ -172,24 +172,24 @@
 
             let tomSelectInstances = [];
 
-            // const selectUsuarios = new TomSelect('#select-usuarios', {
-            //     plugins: ['dropdown_input', 'clear_button'],
-            //     valueField: 'id',
-            //     labelField: 'name',
-            //     searchField: 'name',
-            //     placeholder: 'Buscar trabajadores...',
-            //     maxItems: null,
-            //     create: false,
-            //     options: usersData,
-            //     render: {
-            //         option: function(data, escape) {
-            //             return `<div>${escape(data.name)}</div>`
-            //         },
-            //         item: function(data, escape) {
-            //             return `<div>${escape(data.name)}</div>`
-            //         }
-            //     }
-            // });
+            const selectUsuarios = new TomSelect('#select-usuarios', {
+                plugins: ['dropdown_input', 'clear_button'],
+                valueField: 'id',
+                labelField: 'name',
+                searchField: 'name',
+                placeholder: 'Buscar trabajadores...',
+                maxItems: null,
+                create: false,
+                options: usersData,
+                render: {
+                    option: function(data, escape) {
+                        return `<div>${escape(data.name)}</div>`
+                    },
+                    item: function(data, escape) {
+                        return `<div>${escape(data.name)}</div>`
+                    }
+                }
+            });
 
             function initTomSelectElemento(element) {
                 const tomSelect = new TomSelect(element, {

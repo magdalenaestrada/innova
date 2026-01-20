@@ -61,53 +61,51 @@
             <div class="loader">
                 {{ __('GARITA DE CONTROL') }}
             </div>
-            {{-- @php
-                $user = Auth::user();
-                $tActivoUser = \App\Models\ControlGarita::where('usuario_id', $user->id)->where('estado','activo')->first();
-                $canRegisterMovement = $tActivoUser !== null && $user->can('create', $tActivoUser); // usa policy
-            @endphp --}}
             <div class="text-right col-md-6" id="turno-btn">
-                {{-- @if ($turnoActivo)
-                    @if($canRegisterMovement)
-                        <a href="#" data-toggle="modal" data-target="#ModalCreate">
-                            <button class="button-create">
-                                <i class="fas fa-sign-in-alt"></i> {{ __('REGISTRAR MOVIMIENTO') }}
-                            </button>
-                        </a>
-                    @else
-                        <button class="button-create" disabled title="Debes iniciar tu turno o no tienes permiso para registrar">
-                            <i class="fas fa-sign-in-alt"></i> {{ __('REGISTRAR MOVIMIENTO') }}
-                        </button>
-                        <small class="d-block text-muted mt-1">Inicia tu turno o solicita permiso al responsable.</small>
-                    @endif
-
-                    <button class="btn btn-danger" id="btn-endturn">
-                        <i class="fas fa-stop"></i> {{ __('FINALIZAR TURNO') }}
-                    </button>
-                @else
-                    <a class="" href="#" data-toggle="modal" data-target="#ModalLogin">
-                        <button class="button-create">
-                            {{ __('INICIAR TURNO') }}
-                        </button>
-                    </a>
-                @endif --}}
+                @php
+                    $puedeCerrar = false;
+                    if($turnoActivo) {
+                        $inicio = \Carbon\Carbon::parse($turnoActivo->fecha);
+                        $finProgramado = ($turnoActivo->turno == 0) 
+                            ? $inicio->copy()->setTime(19, 0, 0) 
+                            : $inicio->copy()->addDay()->setTime(7, 0, 0);
+                            
+                        // Margen de tolerancia: ej. permitir cerrar 15 min antes si quieres
+                        // $puedeCerrar = \Carbon\Carbon::now()->gte($finProgramado); 
+                        
+                        // Si es admin
+                        if(Auth::user()->can('end cg-turn early')) {
+                            $puedeCerrar = true;
+                        }
+                    }
+                @endphp
                 @if ($turnoActivo)
                     <a href="#" data-toggle="modal" data-target="#ModalCreate">
                         <button class="button-create">
                             <i class="fas fa-sign-in-alt"></i> {{ __('REGISTRAR MOVIMIENTO') }}
                         </button>
                     </a>
-                    @if($turnoActivo->usuario_id == Auth::id() || Auth::user()->can('force end turn')) 
+                    @if($puedeCerrar)
                         <button class="btn btn-danger" id="btn-endturn">
                             <i class="fas fa-stop"></i> {{ __('FINALIZAR TURNO') }}
                         </button>
+                    @else
+                        <button class="btn btn-secondary" disabled title="El turno finaliza a las {{ $finProgramado->format('H:i') }}">
+                            <i class="fas fa-lock"></i> {{ __('TURNO TERMINA A LAS ') }} {{ $finProgramado->format('H:i') }}
+                        </button>
                     @endif
                 @else
-                    <a class="" href="#" data-toggle="modal" data-target="#ModalLogin">
-                        <button class="button-create">
-                            {{ __('INICIAR TURNO') }}
+                    @if (Auth::user()->can('start cg-turn'))
+                        <a class="" href="#" data-toggle="modal" data-target="#ModalLogin">
+                            <button class="button-create">
+                                {{ __('INICIAR TURNO') }}
+                            </button>
+                        </a>
+                    @else
+                        <button class="btn btn-secondary" disabled title="No tienes permiso para iniciar un turno">
+                            <i class="fas fa-lock"></i> {{ __('SIN TURNO ACTIVO') }}
                         </button>
-                    </a>
+                    @endif
                 @endif
             </div>
             <div class="text-right col-md-6" id="turno-container">
@@ -251,13 +249,7 @@
                                                 {{ Str::limit(strtoupper($detalle->ocurrencias), 50) }}
                                             </td>
                                             <td class="btn-group align-items-center">
-                                                <button class="btn btn-sm btn-warning btn-editar-detalle"
-                                                    data-toggle="modal" data-target="#ModalEdit{{ $detalle->id }}">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-
-                                                @include('controlgarita.modal.edit', ['detalle' => $detalle])
-                                                {{-- @if ($ultimoTurnoActivo)
+                                                @if (Auth::user()->can('edit cg-register'))
                                                     <button class="btn btn-sm btn-warning btn-editar-detalle"
                                                         data-toggle="modal" data-target="#ModalEdit{{ $detalle->id }}">
                                                         <i class="fas fa-edit"></i>
@@ -265,11 +257,10 @@
 
                                                     @include('controlgarita.modal.edit', ['detalle' => $detalle])
                                                 @else
-                                                    <button class="btn btn-sm btn-secondary" disabled
-                                                        title="No se puede editar turnos pasados">
+                                                    <button class="btn btn-sm btn-secondary" disabled>
                                                         <i class="fas fa-lock"></i>
                                                     </button>
-                                                @endif --}}
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach

@@ -150,12 +150,38 @@ class ControlGaritaController extends Controller
 
     public function endTurn()
     {
-        $ultimoTurno = ControlGarita::where('usuario_id', Auth::id())
+        $user = Auth::user();
+
+        $ultimoTurno = ControlGarita::where('usuario_id', $user->id)
+            ->where('estado', 'activo')
             ->orderBy('id', 'desc')
             ->first();
 
         if (!$ultimoTurno || $ultimoTurno->estado === 'finalizado') {
             return redirect()->back()->with('error', 'No tienes un turno activo para finalizar.');
+        }
+
+        $now = Carbon::now('America/Lima');
+        $fechaTurno = Carbon::parse($ultimoTurno->fecha);
+
+        if ($ultimoTurno->turno == 0) {
+            // TURNO DÍA (07:00 AM - 19:00 PM del mismo día)
+            $horaSalidaProgramada = $fechaTurno->copy()->setTime(19, 0, 0);
+        } else {
+            // TURNO NOCHE (19:00 PM - 07:00 AM del día SIGUIENTE)
+            $horaSalidaProgramada = $fechaTurno->copy()->addDay()->setTime(7, 0, 0);
+        }
+
+        if ($now->lessThan($horaSalidaProgramada) && !$user->can('end cg-turn early')) {
+ 
+            $horaFormateada = $horaSalidaProgramada->format('d/m/Y H:i');
+            $tiempoRestante = $now->diffForHumans($horaSalidaProgramada, [
+                'parts' => 2,
+                'join' => true,
+                'syntax' => Carbon::DIFF_ABSOLUTE
+            ]);
+
+            return redirect()->back()->with('error', "Aún no puedes finalizar. Tu turno acaba a las {$horaFormateada}. Faltan: {$tiempoRestante}.");
         }
 
         $ultimoTurno->update([

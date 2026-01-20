@@ -13,7 +13,7 @@
                 <div class="row justify-content-between">
                     <div class="col-md-6">
                         <h6 class="mt-2">
-                            {{ __('CREAR ETIQUETA') }}
+                            {{ __('ETIQUETAS') }}
                         </h6>
                     </div>
                     <div class="col-md-6 text-right">
@@ -29,32 +29,34 @@
                     method="POST">
 
                     @csrf
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Nombre</label>
-                            <input name="nombre" id="nombre_etiqueta" class="form-control" type="text" placeholder="Ej: Liquidación" required>
+                    
+                    @if (Auth::user()->can('create cg-etiqueta'))
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Nombre</label>
+                                <input name="nombre" id="nombre_etiqueta" class="form-control" type="text" placeholder="Ej: Liquidación" required>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label fw-semibold">Color</label>
+                                <input name="color" id="color_etiqueta" class="form-control" type="color" value="#000000" required>
+                            </div>
                         </div>
-                        <div class="col-md-8">
-                            <label class="form-label fw-semibold">Color</label>
-                            <input name="color" id="color_etiqueta" class="form-control" type="color" value="#000000" required>
+                        <br>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">Descripción</label>
+                                <textarea name="descripcion" id="descripcion_etiqueta" class="form-control" rows="2"></textarea>
+                            </div>
                         </div>
-                    </div>
-                    <br>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <label class="form-label fw-semibold">Descripción</label>
-                            <textarea name="descripcion" id="descripcion_etiqueta" class="form-control" rows="2"></textarea>
+                        <br>
+                        <div class="row">
+                            <div class="col-md-12 text-right mt-1">
+                                <button type="submit" class="btn btn-secondary btn-sm">
+                                    {{ __('GUARDAR') }}
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <br>
-                    <div class="row">
-                        <div class="col-md-12 text-right mt-1">
-                            {{-- No olvidar quitar el onclick="reproducirAudio()" --}}
-                            <button type="submit" class="btn btn-secondary btn-sm">
-                                {{ __('GUARDAR') }}
-                            </button>
-                        </div>
-                    </div>
+                    @endif
                     <br>
                     <div class="table-responsive">
                         <table id="table-labels" class="table table-striped">

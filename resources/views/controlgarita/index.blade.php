@@ -97,9 +97,11 @@
                             <i class="fas fa-sign-in-alt"></i> {{ __('REGISTRAR MOVIMIENTO') }}
                         </button>
                     </a>
-                    <button class="btn btn-danger" id="btn-endturn">
-                        <i class="fas fa-stop"></i> {{ __('FINALIZAR TURNO') }}
-                    </button>
+                    @if($turnoActivo->usuario_id == Auth::id() || Auth::user()->can('force end turn')) 
+                        <button class="btn btn-danger" id="btn-endturn">
+                            <i class="fas fa-stop"></i> {{ __('FINALIZAR TURNO') }}
+                        </button>
+                    @endif
                 @else
                     <a class="" href="#" data-toggle="modal" data-target="#ModalLogin">
                         <button class="button-create">

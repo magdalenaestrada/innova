@@ -26,23 +26,31 @@ class DetalleControlGaritaController extends Controller
      */
     public function index()
     {
-        $ultimoTurno = ControlGarita::where('usuario_id', Auth::id())
-            ->orderBy('id', 'desc')
-            ->with(['cargos'])
-            ->first();
+        // $ultimoTurno = ControlGarita::where('usuario_id', Auth::id())
+        //     ->orderBy('id', 'desc')
+        //     ->with(['cargos'])
+        //     ->first();
 
-        $turnoActivo = null;
-        if ($ultimoTurno && $ultimoTurno->estado === 'activo')
-        {
-            $turnoActivo = $ultimoTurno;
-        }
-        $detalles = DetalleControlGarita::whereHas('controlGarita', function ($query) {
-                $query->where('usuario_id', Auth::id());
+        // $turnoActivo = null;
+        // if ($ultimoTurno && $ultimoTurno->estado === 'activo')
+        // {
+        //     $turnoActivo = $ultimoTurno;
+        // }
+        // $controlGarita = ControlGarita::orderBy('id', 'desc')->get();
+        $user = Auth::user();
+        $turnoActivo = ControlGarita::where('estado', 'activo')->where(function ($query) use ($user) {
+            $query->where('usuario_id', $user->id)
+                  ->orWhereHas('agentes', function ($q) use ($user) {
+                      $q->where('usuarios_id', $user->id);
+                  });
             })
+            ->with(['cargos'])
             ->latest('id')
+            ->first();
+        $detalles = DetalleControlGarita::latest('id')
+            ->limit(100)
             ->get();
         $etiquetas = Etiqueta::latest('id')->get();
-        $controlGarita = ControlGarita::orderBy('id', 'desc')->get();
         $productos = Producto::select('id', 'nombre_producto')->get();
         $users = User::select('id', 'name')
             ->whereHas('empleado.area', function ($q) {
@@ -51,11 +59,11 @@ class DetalleControlGaritaController extends Controller
         
         return view('controlgarita.index', compact(
             'detalles',
-            'controlGarita',
+            // 'controlGarita',
             'productos',
             'users',
             'turnoActivo',
-            'ultimoTurno',
+            // 'ultimoTurno',
             'etiquetas'
         ));
     }

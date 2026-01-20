@@ -101,8 +101,8 @@
                                     Puede seleccionar múltiples usuarios
                                 </small>
                             </select>
-                            <input id="usuario" class="form-control" value="{{ Auth::user()->name }}" type="text"
-                                disabled>
+                            {{-- <input id="usuario" class="form-control" value="{{ Auth::user()->name }}" type="text"
+                                disabled> --}}
                         </div>
                     </div>
                     <br>

@@ -12,7 +12,7 @@ class EtiquetaController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('permission:create cg-etiquet', ['only' => ['store']]);
+        $this->middleware('permission:create cg-etiqueta', ['only' => ['store']]);
     }
 
     /**

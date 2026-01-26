@@ -18,10 +18,43 @@
             border-radius: 10px !important;
         }
 
+        /*TOMB SELECT*/
         #ModalCreate .ts-control {
             border-radius: 10px !important;
             min-height: calc(1.5em + 0.75rem + 2px);
             border: 1px solid #ced4da;
+            padding: 0 0 0 15px !important;
+            font-size: 16px;
+        }
+
+        #select_tipo_vehiculo_crt + .ts-wrapper .ts-control .item {
+            padding: 0.375rem 0;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        #select_tipo_vehiculo_crt + .ts-wrapper .ts-control input {
+            padding: 0.375rem 0.75rem;
+            line-height: 1.5;
+        }
+
+        #select_tipo_vehiculo_crt + .ts-wrapper .ts-control input::placeholder {
+            font-size: 16px;
+        }
+
+        #select_tipo_mineral_crt + .ts-wrapper .ts-control .item {
+            padding: 0.375rem 0;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        #select_tipo_mineral_crt + .ts-wrapper .ts-control input {
+            padding: 0.375rem 0.75rem;
+            line-height: 1.5;
+        }
+
+        #select_tipo_mineral_crt + .ts-wrapper .ts-control input::placeholder {
+            font-size: 16px;
         }
 
         #ModalCreate .card-header-crt {
@@ -218,7 +251,7 @@
                             <div class="col-md-3">
                                 <label class="form-label fw-semibold">Tipo documento</label>
                                 <select name="tipo_documento" id="select_tipo_documento_persona_crt" class="form-control form-select-sm estado-select w-150">
-                                    <option value="">Seleccione...</option>
+                                    <option value="" disabled hidden>Seleccione...</option>
                                     <option value="1">DNI</option>
                                     <option value="2">RUC</option>
                                 </select>
@@ -247,13 +280,8 @@
                         <div class="row">
                             <div class="col-md-3">
                                 <label class="form-label fw-semibold">Tipo Vehículo</label>
-                                <select name="tipo_vehiculo" id="select_tipo_vehiculo_crt" class="form-control form-select-sm estado-select w-150">
+                                <select name="tipo_vehiculo" id="select_tipo_vehiculo_crt" class="form-select-sm estado-select w-150">
                                     <option value="">Seleccione...</option>
-                                    <option value="1">Auto</option>
-                                    <option value="2">Minivan</option>
-                                    <option value="3">Camioneta</option>
-                                    <option value="4">Volquete</option>
-                                    <option value="5">Encapsulado</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -266,7 +294,7 @@
                             <div class="col-md-3">
                                 <label class="form-label fw-semibold">Tipo documento</label>
                                 <select name="tipo_documento" id="select_tipo_documento_vehiculo_crt" class="form-control form-select-sm estado-select w-150" required>
-                                    <option value="">Seleccione...</option>
+                                    <option value="" disabled hidden>Seleccione...</option>
                                     <option value="1">DNI</option>
                                     <option value="2">RUC</option>
                                 </select>
@@ -285,7 +313,7 @@
                         <br>
                         <div class="row">
                             <div class="col-md-3">
-                                <label class="form-label fw-semibold">¿Trae Carga?</label><br>
+                                <label class="form-label fw-semibold">¿Trae Mineral?</label><br>
                                 <div class="btn-group btn-group-crt w-100" role="group" aria-label="Trae carga">
                                     <input type="radio" class="btn-check-crt" name="trae_carga" id="trae_carga_no_crt"
                                         value="0" autocomplete="off" checked>
@@ -300,17 +328,25 @@
                         <div class="row d-none" id="detalles_carga_crt">
                             <div class="form col-md-4">
                                 <br>
-                                <label class="form-label fw-semibold">Tipo carga</label>
-                                <select name="tipo_carga" id="select_tipo_carga_crt" class="form-control form-select-sm estado-select w-150">
+                                <label class="form-label fw-semibold">Tipo mineral</label>
+                                <select name="tipo_mineral" id="select_tipo_mineral_crt" class="form-select-sm estado-select w-150">
                                     <option value="">Seleccione...</option>
-                                    <option value="1">Mineral chancado</option>
-                                    <option value="2">Mineral a granel</option>
                                 </select>
                             </div>
                             <div class="form col-md-4">
                                 <br>
                                 <label class="form-label fw-semibold">Destino</label>
                                 <input name="destino" id="destino_crt" class="form-control" type="text" placeholder="Ej: Loza 1" required>
+                            </div>
+                            <div class="form col-md-4">
+                                <br>
+                                <label class="form-label fw-semibold">Lote</label>
+                                <select name="lote" id="lote_crt" class="form-control form-select-sm estado-select w-150">
+                                    <option value="" disabled hidden>Seleccione un lote...</option>
+                                    @foreach ($lotes as $lote)
+                                        <option value="{{ $lote->id }}">{{ $lote->nombre }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             {{-- <div class="form col-md-4">
                                 <label class="form-label fw-semibold">Servicio</label>
@@ -347,12 +383,11 @@
 
     <script>
         $(() => {
-            let selectTomSelect = new TomSelect("#etiqueta_id_crt",{
+            let selectEtiquetaTS = new TomSelect("#etiqueta_id_crt",{
                 allowEmptyOption: true,
                 controlInput: null,
                 render: {
                     option: function(data, escape) {
-                        console.log(data);
                         const color = data.$option?.dataset?.color;
                         return `
                             <div style="display: flex; align-items: center; gap: 8px; font-size: 14px;">
@@ -369,6 +404,132 @@
                                 <span style="background: ${color}; width: 30px; height: 100%; transform-origin: left; transform: scaleX(2) scaleY(2); display: inline-block; box-shadow: -2px 0 6px rgba(0,0,0,0.15);"></span>
                             </div>
                         `;
+                    }
+                }
+            });
+            
+            let selectTipoVehiculoTS = new TomSelect("#select_tipo_vehiculo_crt",{
+                // plugins: ['dropdown_input'],
+                valueField: 'id',
+                labelField: 'nombre',
+                searchField: 'nombre',
+                create: true,
+                preload: true,
+                persist: true,
+                load: function(query, callback) {
+                    $.ajax({
+                        url: '{{ route("controlgarita.tipo-vehiculo.index") }}',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {
+                            callback(data);
+                        },
+                        error: function() {
+                            callback();
+                        }
+                    })
+                },
+                onOptionAdd: function(value, data) {
+                    if ($.isNumeric(value)) return;
+
+                    $.ajax({
+                        url: '{{ route("controlgarita.tipo-vehiculo.store") }}',
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            nombre: value
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                const nuevoTipoVehiculo = response.tipoVehiculo;
+                                selectTipoVehiculoTS.updateOption(value, {
+                                    nombre: nuevoTipoVehiculo.nombre
+                                });
+                                selectTipoVehiculoTS.addItem(nuevoTipoVehiculo.id);
+                            } else {
+                                selectTipoVehiculoTS.removeOption(value);
+                                alert('Error al crear el tipo de vehículo.');
+                            }
+                        },
+                        error: function(xhr) {
+                            selectTipoVehiculoTS.removeOption(value);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error de validación',
+                                html: xhr.responseJSON?.message ?? 'Error desconocido',
+                            });
+                        }
+                    })
+                },
+                render: {
+                    option: function(data, escape) {
+                        return `<div style="font-size: 14px; margin-left: 7px;">${escape(data.nombre)}</div>`;
+                    },
+                    item: function(data, escape) {
+                        return `<div>${escape(data.nombre)}</div>`;
+                    }
+                }
+            });
+            
+            let selectTipoMineralTS = new TomSelect("#select_tipo_mineral_crt",{
+                // plugins: ['dropdown_input'],
+                valueField: 'id',
+                labelField: 'nombre',
+                searchField: 'nombre',
+                create: true,
+                preload: true,
+                persist: true,
+                load: function(query, callback) {
+                    $.ajax({
+                        url: '{{ route("controlgarita.tipo-mineral.index") }}',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {
+                            callback(data);
+                        },
+                        error: function() {
+                            callback();
+                        }
+                    })
+                },
+                onOptionAdd: function(value, data) {
+                    if ($.isNumeric(value)) return;
+
+                    $.ajax({
+                        url: '{{ route("controlgarita.tipo-mineral.store") }}',
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            nombre: value
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                const nuevoTipoMineral = response.tipoMineral;
+                                selectTipoMineralTS.updateOption(value, {
+                                    nombre: nuevoTipoMineral.nombre
+                                });
+                                selectTipoMineralTS.addItem(nuevoTipoMineral.id);
+                            } else {
+                                selectTipoMineralTS.removeOption(value);
+                                alert('Error al crear el tipo de mineral, success.');
+                            }
+                        },
+                        error: function(xhr) {
+                            selectTipoMineralTS.removeOption(value);
+                            Swal.fire({
+                                type: 'error',
+                                title: 'Error de validación',
+                                html: xhr.responseJSON?.message ?? 'Error desconocido',
+                            });
+                        }
+                    })
+                },
+                render: {
+                    option: function(data, escape) {
+                        return `<div style="font-size: 14px; margin-left: 7px;">${escape(data.nombre)}</div>`;
+                    },
+                    item: function(data, escape) {
+                        return `<div>${escape(data.nombre)}</div>`;
                     }
                 }
             });
@@ -429,7 +590,7 @@
                         documento: $('#documento_vehiculo_crt').val(),
                         nombre: $('#nombre_vehiculo_crt').val(),
                         trae_carga: $('#trae_carga_si_crt').is(':checked') ? 1 : 0,
-                        tipo_carga: $('#select_tipo_carga_crt').val(),
+                        tipo_mineral: $('#select_tipo_mineral_crt').val(),
                         destino: $('#destino_crt').val(),
                         ocurrencias: $('#ocurrencias_vehiculo_crt').val()
                     };
@@ -453,7 +614,7 @@
                     } else {
                         $(`#trae_carga_no_crt`).prop('checked', true);
                     }
-                    $('#select_tipo_carga_crt').val(datosTemporales.vehiculo.tipo_carga);
+                    $('#select_tipo_mineral_crt').val(datosTemporales.vehiculo.tipo_mineral);
                     $('#destino_crt').val(datosTemporales.vehiculo.destino);
                     $('#ocurrencias_vehiculo_crt').val(datosTemporales.vehiculo.ocurrencias);
                     toggleCargaFields();
@@ -492,14 +653,14 @@
                 if ($('#select_tipo_entidad_crt').val() === 'V') {
                     if ($('#trae_carga_si_crt').is(':checked')) {
                         $('#detalles_carga_crt').removeClass('d-none');
+                        $('#destino_crt').prop('required', true);
                         $('#detalles_carga_crt').find('input, select')
-                            .prop('disabled', false)
-                            .prop('required', true);
+                            .prop('disabled', false);
                     } else {
                         $('#detalles_carga_crt').addClass('d-none');
+                        $('#destino_crt').prop('required', false);
                         $('#detalles_carga_crt').find('input, select')
-                            .prop('disabled', true)
-                            .prop('required', false)
+                            .prop('disabled', true);
                     }
                 }
             }
@@ -509,6 +670,15 @@
                 const hour = String(now.getHours()).padStart(2, '0');
                 const minute = String(now.getMinutes()).padStart(2, '0');
                 $('#hora_crt').val(`${hour}:${minute}`);
+            }
+
+            function resetTomSelects(...selects) {
+                selects.forEach(ts => {
+                    if(!ts) return;
+                    ts.clear();
+                    ts.setValue('');
+                    ts.close();
+                });
             }
 
             function limpiarModal() {
@@ -522,11 +692,7 @@
                 $('.documento-input-crt, .nombre-input-crt').removeClass('is-valid is-invalid');
                 $('#select_tipo_entidad_crt').val('P');
                 $('#tipo_movimiento-crt').val('E');
-                if (selectTomSelect) {
-                    selectTomSelect.clear();
-                    selectTomSelect.setValue('');
-                    selectTomSelect.close();
-                }
+                resetTomSelects(selectEtiquetaTS, selectTipoVehiculoTS, selectTipoMineralTS);
                 
                 setHoraActual();
                 toggleEntidad();

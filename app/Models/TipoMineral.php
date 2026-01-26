@@ -7,15 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class TipoVehiculo extends Model
+class TipoMineral extends Model
 {
     use HasFactory;
 
-    protected $table = 'tipos_vehiculos';
+    protected $table = 'tipo_mineral';
 
     protected $fillable = [
-        'nombre',
-        'descripcion',
+        'nombre'
         ];
 
     protected function nombre(): Attribute
@@ -26,15 +25,8 @@ class TipoVehiculo extends Model
         );
     }
 
-    protected function descripcion(): Attribute
-    {
-        return Attribute::make(
-            set: fn ($value) => $value ? Str::upper($value) : null,
-        );
-    }
-
     public function detalles()
     {
-        return $this->hasMany(DetalleControlGarita::class, foreignKey: 'tipo_vehiculo_id');
+        return $this->hasMany(DetalleControlGarita::class, foreignKey: 'tipo_mineral_id');
     }
 }

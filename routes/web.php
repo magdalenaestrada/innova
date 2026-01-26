@@ -44,6 +44,7 @@ use App\Http\Controllers\LqClienteController;
 use App\Http\Controllers\LqDevolucionController;
 use App\Http\Controllers\LqSociedadController;
 use App\Http\Controllers\PersonaController;
+use App\Http\Controllers\TipoMineralController;
 use App\Http\Controllers\TsBancoController;
 use App\Http\Controllers\TscajaController;
 use App\Http\Controllers\TsCuentaController;
@@ -79,7 +80,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('garitas', GaritaController::class);
     Route::resource('motivos', MotivoController::class);
     Route::resource('registros', RegistroController::class);
-    Route::resource('vehiculos', TipoVehiculoController::class);
+    // Route::resource('vehiculos', TipoVehiculoController::class);
     Route::resource('almacenes', AlmacensController::class);
     Route::resource('productos', ProductoController::class)->parameters(['page' => 'page']);
     Route::resource('programacion', ProgramacionController::class);
@@ -179,6 +180,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('export-excel-otrascajasreporte/{id}', [TsReposicioncajaController::class, 'export_excel_otra'])->name('tsotrascajas.export-excel');
     Route::get('export-excel-reportescuentas', [TsReporteDiarioCuentasController::class, 'export_excel'])->name('tsreportescuentas.export-excel');
     Route::get('export-contable-excel-reportescuentas', [TsReporteDiarioCuentasController::class, 'export_excel_contable'])->name('tsreporteContablecuentas.export-excel');
+    Route::get('export-excel-detallecontrolgarita', [DetalleControlGaritaController::class, 'export_excel'])->name('detcontrolgarita.export-excel');
+    Route::post('export-excel-custom-detallecontrolgarita', [DetalleControlGaritaController::class, 'export_excel_custom'])->name('detcontrolgarita.export-excel-custom');
 
     //ANULAR ROUTES
     Route::get('/inventarioingresos/{id}/anular', [InventarioingresoController::class, 'anular'])->name('inventarioingresos.anular');
@@ -274,6 +277,12 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::post('/controlgarita/etiqueta', [EtiquetaController::class, 'store'])->name('controlgarita.etiqueta.store');
     Route::put('/controlgarita/etiqueta/{id}', [EtiquetaController::class, 'update'])->name('controlgarita.etiqueta.update');
+
+    Route::get('/controlgarita/tipo-mineral', [TipoMineralController::class, 'index'])->name('controlgarita.tipo-mineral.index');
+    Route::post('/controlgarita/tipo-mineral/guardar', [TipoMineralController::class, 'store'])->name('controlgarita.tipo-mineral.store');
+
+    Route::get('/controlgarita/tipo-vehiculo', [TipoVehiculoController::class, 'index'])->name('controlgarita.tipo-vehiculo.index');
+    Route::post('/controlgarita/tipo-vehiculo/guardar', [TipoVehiculoController::class, 'store'])->name('controlgarita.tipo-vehiculo.store');
 
     Route::get('/salidascuentas/datatable', [TsSalidacuentaController::class, 'datatable'])->name('salidascuentas.datatable');
 });

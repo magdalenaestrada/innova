@@ -56,8 +56,8 @@
                                 </button>
                             </div>
                         </div>
+                        <br>
                     @endif
-                    <br>
                     <div class="table-responsive">
                         <table id="table-labels" class="table table-striped">
                             <thead>
@@ -111,7 +111,6 @@
 
             $('#color').on('change', function() {
                 const colorValue = $(this).val();
-                console.log(colorValue);
                 // $('#nombre_etiqueta').css('color', colorValue);
             });
 

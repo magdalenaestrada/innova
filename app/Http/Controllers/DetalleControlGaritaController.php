@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\DetalleControlGaritaExport;
 use App\Models\ControlGarita;
 use App\Models\DetalleControlGarita;
 use App\Models\Producto;
 use App\Models\Etiqueta;
+use App\Models\Lote;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DetalleControlGaritaController extends Controller
 {
@@ -47,20 +50,19 @@ class DetalleControlGaritaController extends Controller
             ->with(['cargos'])
             ->latest('id')
             ->first();
-        $detalles = DetalleControlGarita::latest('id')
-            ->limit(100)
-            ->get();
+        $detalles = $turnoActivo ? $turnoActivo->detalles()->latest('id')->limit(100)->get() : collect();
         $etiquetas = Etiqueta::latest('id')->get();
         $productos = Producto::select('id', 'nombre_producto')->get();
+        $lotes = Lote::select('id', 'nombre')->get();
         $users = User::select('id', 'name')
             ->whereHas('empleado.area', function ($q) {
                 $q->where('nombre', 'like', 'garita%');
             })->get();
         
-        return view('controlgarita.index', compact(
+        return view('controlgarita.controlregistro.index', compact(
             'detalles',
-            // 'controlGarita',
             'productos',
+            'lotes',
             'users',
             'turnoActivo',
             // 'ultimoTurno',
@@ -89,20 +91,18 @@ class DetalleControlGaritaController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-        $request->validate([
-            'tipo_movimiento' => 'required|in:E,S',
-            'tipo_entidad' => 'required|in:P,V',
-            'nombre' => 'required|string|max:255',
-            'documento' => 'required|string|max:11',
-            'tipo_documento' => 'required|in:1,2',
-            'ocurrencias' => 'nullable|string',
-            'hora' => 'required|date_format:H:i',
-            'destino' => 'nullable|string',
-            'placa' => 'nullable|string',
-        ]);
-
         try {
+            $request->validate([
+                'tipo_movimiento' => 'required|in:E,S',
+                'tipo_entidad' => 'required|in:P,V',
+                'nombre' => 'required|string|max:255',
+                'documento' => 'required|string|max:11',
+                'tipo_documento' => 'required|in:1,2',
+                'ocurrencias' => 'nullable|string',
+                'hora' => 'required|date_format:H:i',
+                'destino' => 'nullable|string',
+                'placa' => 'nullable|string',
+            ]);
             $user = Auth::id();
 
             $turnoActivo = ControlGarita::where('usuario_id', $user)
@@ -123,15 +123,15 @@ class DetalleControlGaritaController extends Controller
             DetalleControlGarita::create([
                 'tipo_movimiento' => $request->tipo_movimiento,
                 'tipo_entidad' => $request->tipo_entidad,
-                'nombre' => Str::upper($request->nombre),
+                'nombre' => $request->nombre,
                 'documento' => $request->documento,
                 'tipo_documento' => $request->tipo_documento,
-                'ocurrencias' => $request->ocurrencias ? Str::upper($request->ocurrencias) : null,
+                'ocurrencias' => $request->ocurrencias,
                 'hora' => $request->hora,
-                'destino' => $request->destino ? Str::upper($request->destino) : null,
-                'placa' => $request->placa ? Str::upper($request->placa) : null,
-                'tipo_carga' => $request->tipo_carga,
-                'tipo_vehiculo' => $request->tipo_vehiculo,
+                'destino' => $request->destino,
+                'placa' => $request->placa,
+                'tipo_mineral_id' => $request->tipo_mineral,
+                'tipo_vehiculo_id' => $request->tipo_vehiculo,
                 'etiqueta_id' => $request->etiqueta_id,
                 'control_garita_id' => $turnoActivo->id,
                 'usuario_id' => $user,
@@ -142,11 +142,11 @@ class DetalleControlGaritaController extends Controller
 
             // return redirect()->back()->with('success', $mensaje);
             return redirect()->back()->with('success', 'Entrada registrada exitosamente');
-        } catch (\Exception $e) {
-            // return redirect()->back()->with('error', 'Error al registrar el detalle de control de garita: ' . $e->getMessage());
+        } catch (\Throwable $th) {
+            // return redirect()->back()->with('error', 'Error al registrar el detalle de control de garita: ' . $th->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error al registrar registro: ' . $e->getMessage(),
+                'message' => 'Error al registrar: ' . $th->getMessage(),
             ], 500);
         }
     }
@@ -189,26 +189,26 @@ class DetalleControlGaritaController extends Controller
             $detalle->update([
                 'tipo_movimiento' => $request->tipo_movimiento,
                 'tipo_entidad' => $request->tipo_entidad,
-                'nombre' => Str::upper($request->nombre),
+                'nombre' => $request->nombre,
                 'documento' => $request->documento,
                 'tipo_documento' => $request->tipo_documento,
-                'ocurrencias' => $request->ocurrencias ? Str::upper($request->ocurrencias) : null,
+                'ocurrencias' => $request->ocurrencias,
                 'hora' => $request->hora,
-                'destino' => $request->destino ? Str::upper($request->destino) : null,
-                'placa' => $request->placa ? Str::upper($request->placa) : null,
-                'tipo_carga' => $request->tipo_carga ? Str::upper($request->tipo_carga) : null,
-                'tipo_vehiculo' => $request->tipo_vehiculo ? Str::upper($request->tipo_vehiculo) : null,
-                'etiqueta_id' => $request->etiqueta_id ? $request->etiqueta_id : null,
+                'destino' => $request->destino,
+                'placa' => $request->placa,
+                'tipo_mineral_id' => $request->tipo_mineral,
+                'tipo_vehiculo_id' => $request->tipo_vehiculo,
+                'etiqueta_id' => $request->etiqueta_id,
                 'control_garita_id' => $turnoActivo->id,
                 'usuario_id' => $user,
-            ]); 
+            ]);
 
             return redirect()->back()->with('success', 'Entrada editada exitosamente');
-        } catch (\Exception $e) {
-            // return redirect()->back()->with('error', 'Error al editar el detalle de control de garita: ' . $e->getMessage());
+        } catch (\Throwable $th) {
+            // return redirect()->back()->with('error', 'Error al editar el detalle de control de garita: ' . $th->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error al editar registro: ' . $e->getMessage(),
+                'message' => 'Error al editar registro: ' . $th->getMessage(),
             ], 500);
         }
     }
@@ -221,11 +221,56 @@ class DetalleControlGaritaController extends Controller
         //
     }
 
+    public function export_excel(Request $request)
+    {
+        $tipo_movimiento = $request->input('tipo_movimiento', 'E');
+
+        // Opción 1: Exportar filtrado por tipo
+        return Excel::download(
+            new DetalleControlGaritaExport(null, $tipo_movimiento), 
+            $tipo_movimiento === 'E' ? 'entradas_garita.xlsx' : 'salidas_garita.xlsx'
+        );
+    }
+
+    // Método adicional para exportar con filtros personalizados
+    public function export_excel_custom(Request $request)
+    {
+        $query = DetalleControlGarita::with(['controlGarita', 'usuario', 'etiqueta']);
+
+        // Filtros opcionales
+        if ($request->has('tipo_movimiento')) {
+            $query->where('tipo_movimiento', $request->tipo_movimiento);
+        }
+
+        if ($request->has('fecha_inicio') && $request->has('fecha_fin')) {
+            $query->whereBetween('created_at', [
+                $request->fecha_inicio . ' 00:00:00',
+                $request->fecha_fin . ' 23:59:59'
+            ]);
+        }
+
+        if ($request->has('tipo_entidad')) {
+            $query->where('tipo_entidad', $request->tipo_entidad);
+        }
+
+        if ($request->has('usuario_id')) {
+            $query->where('usuario_id', $request->usuario_id);
+        }
+
+        $detalles = $query->orderBy('created_at', 'desc')->get();
+        $tipo = $request->input('tipo_movimiento', 'E');
+
+        return Excel::download(
+            new DetalleControlGaritaExport($detalles, $tipo),
+            'reporte_garita_' . date('Y-m-d_His') . '.xlsx'
+        );
+    }
+
     public function searchCodigo(Request $request)
     {
         $detalleSearch = DetalleControlGarita::where('nombre', 'like', '%' . $request->search_string . '%')
             ->orWhere('documento', 'like', '%' . $request->search_string . '%')
             ->orderBy('created_at', 'desc')->get();
-        return view('controlgarita.index', compact('detalleSearch'));
+        return view('controlgarita.controlregistro.index', compact('detalleSearch'));
     }
 }

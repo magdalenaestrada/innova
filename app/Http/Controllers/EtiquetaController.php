@@ -36,13 +36,13 @@ class EtiquetaController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'descripcion' => 'nullable|string',
-            'color' => 'nullable|string|max:7',
-        ]);
-
         try {
+            $request->validate([
+                'nombre' => 'required|string|max:255',
+                'descripcion' => 'nullable|string',
+                'color' => 'nullable|string|max:7',
+            ]);
+
             $etiqueta = Etiqueta::create([
                 'nombre' => $request->nombre,
                 'descripcion' => $request->descripcion,
@@ -52,10 +52,10 @@ class EtiquetaController extends Controller
                 'success' => true,
                 'etiqueta' => $etiqueta,
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear etiqueta: ' . $e->getMessage(),
+                'message' => 'Error al crear etiqueta: ' . $th->getMessage(),
             ], 500);
         }
     }

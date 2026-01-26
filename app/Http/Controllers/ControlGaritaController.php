@@ -51,37 +51,26 @@ class ControlGaritaController extends Controller
             return redirect()->back()->with('error', 'Ya tienes un turno activo. Debes finalizar tu turno actual primero.');
         }
 
-        $request->validate([
-            'turno' => 'required|in:0,1',
-            'fecha' => 'required|date',
-            'unidad' => 'required|string|max:255',
-
-            // 'usuarios_id' => 'required|array|min:1',
-            // 'usuarios_id.*' => 'exists:users,id',
-
-            'productos' => 'required|array|min:1',
-            'productos.*.cantidad' => 'required|integer|min:1',
-            'productos.*.productos_id' => 'required|exists:productos,id',
-        ], [
-            'turno.required' => 'Debe seleccionar un turno',
-            'fecha.required' => 'La fecha es obligatoria',
-            'unidad.required' => 'La unidad es obligatoria',
-            // 'usuarios_id.required' => 'Debe seleccionar al menos un usuario',
-            // 'usuarios_id.min' => 'Debe seleccionar al menos un usuario',
-            'productos.required' => 'Debe agregar al menos un elemento',
-            'productos.min' => 'Debe agregar al menos un elemento',
-            'productos.*.cantidad.required' => 'La cantidad es obligatoria',
-            'productos.*.cantidad.min' => 'La cantidad debe ser mayor a 0',
-            'productos.*.productos_id.required' => 'Debe seleccionar un producto',
-        ]);
-
         try {
+            $request->validate([
+                'turno' => 'required|in:0,1',
+                'fecha' => 'required|date',
+                'unidad' => 'required|string|max:255',
+
+                // 'usuarios_id' => 'required|array|min:1',
+                // 'usuarios_id.*' => 'exists:users,id',
+
+                'productos' => 'required|array|min:1',
+                'productos.*.cantidad' => 'required|integer|min:1',
+                'productos.*.productos_id' => 'required|exists:productos,id',
+            ]);
+
             DB::beginTransaction();
 
             $controlGarita = ControlGarita::create([
                 'turno' => $request->turno,
                 'fecha' => $request->fecha,
-                'unidad' => Str::upper($request->unidad),
+                'unidad' => $request->unidad,
                 'estado' => 'activo',
                 'hora_inicio' => $now,
                 'usuario_id' => $user,
@@ -105,13 +94,13 @@ class ControlGaritaController extends Controller
             DB::commit();
 
             return redirect()->back()->with('success', 'Turno iniciado exitosamente');
-        } catch (\Exception $e) {
+        } catch (\Throwable $th) {
             // dd($e->getMessage(), $e->getTrace());
             // return redirect()->back()->with('error', 'Error al iniciar turno: ' . $e->getMessage());
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Error al iniciar turno: ' . $e->getMessage(),
+                'message' => 'Error al iniciar turno: ' . $th->getMessage(),
             ], 500);
         }
     }

@@ -2,170 +2,147 @@
 
 namespace App\Exports;
 
-use App\Models\DetalleControlGarita;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use App\Models\ReporteExcelGarita;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithMapping;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class DetalleControlGaritaExport implements 
-    FromCollection, 
-    WithHeadings, 
-    WithMapping, 
-    WithStyles, 
-    WithTitle,
-    ShouldAutoSize
+class DetalleControlGaritaExport implements FromQuery, WithHeadings, ShouldAutoSize, WithStyles, WithColumnWidths, WithMapping
 {
-    protected $detalles;
-    protected $tipo;
+    use Exportable;
 
-    public function __construct($detalles = null, $tipo = 'E')
+    protected $filtros;
+
+    public function __construct(array $filtros)
     {
-        $this->detalles = $detalles;
-        $this->tipo = $tipo;
+        $this->filtros = $filtros;
     }
 
-    /**
-     * Retorna la colección de datos a exportar
-     */
-    public function collection()
+    public function query()
     {
-        if ($this->detalles) {
-            return $this->detalles;
-        }
-
-        return DetalleControlGarita::with(['controlGarita', 'usuario', 'etiqueta', ''])
-            ->where('tipo_movimiento', $this->tipo)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return ReporteExcelGarita::query()
+            ->tipoMovimiento($this->filtros['tipo_movimiento'] ?? null)
+            ->tipoEntidad($this->filtros['tipo_entidad'] ?? null)
+            ->fechaBetween($this->filtros['fecha_inicio'] ?? null, $this->filtros['fecha_fin'] ?? null)
+            ->horaBetween($this->filtros['hora_inicio'] ?? null, $this->filtros['hora_fin'] ?? null)
+            ->usuario($this->filtros['usuario_id'] ?? null)
+            ->orderBy('FECHA DE REGISTRO', 'DESC');
     }
 
-    /**
-     * Define los encabezados de las columnas
-     */
+    public function map($registro): array
+    {
+        return [
+            $registro->{'TIPO MOVIMIENTO'},
+            $registro->FECHA,
+            $registro->HORA,
+            $registro->{'TIPO ENTIDAD'},
+            $registro->{'TIPO DOCUMENTO'},
+            $registro->{'N° DOCUMENTO'},
+            $registro->NOMBRE,
+            $registro->PLACA,
+            $registro->{'TIPO VEHÍCULO'},
+            $registro->{'TIPO CARGA'},
+            $registro->DESTINO,
+            $registro->TURNO,
+            $registro->UNIDAD,
+            $registro->OCURRENCIAS,
+            $registro->{'REGISTRADO POR'},
+            $registro->{'FECHA DE REGISTRO'},
+        ];
+    }
+
     public function headings(): array
     {
         return [
-            'ID',
-            'TIPO MOVIMIENTO',
-            'FECHA',
-            'HORA',
-            'TIPO ENTIDAD',
-            'TIPO DOCUMENTO',
-            'DOCUMENTO',
-            'NOMBRE',
-            'PLACA',
-            'TIPO VEHÍCULO',
-            'TRAE CARGA',
-            'TIPO CARGA',
-            'DESTINO',
-            'OCURRENCIAS',
-            'ETIQUETA',
-            'TURNO',
-            'UNIDAD',
-            'REGISTRADO POR',
-            'FECHA REGISTRO',
+            'TIPO MOVIMIENTO', 
+            'FECHA', 
+            'HORA', 
+            'TIPO ENTIDAD', 
+            'TIPO DOCUMENTO', 
+            'N° DOCUMENTO', 
+            'NOMBRE', 
+            'PLACA', 
+            'TIPO VEHÍCULO', 
+            'TIPO CARGA', 
+            'DESTINO', 
+            'TURNO', 
+            'UNIDAD', 
+            'OCURRENCIAS', 
+            'REGISTRADO POR', 
+            'FECHA DE REGISTRO', 
         ];
     }
 
-    /**
-     * Mapea cada fila de datos
-     */
-    public function map($detalle): array
+    public function columnWidths(): array
     {
         return [
-            $detalle->id,
-            $detalle->tipo_movimiento === 'E' ? 'ENTRADA' : 'SALIDA',
-            $detalle->created_at ? $detalle->created_at->format('d/m/Y') : '',
-            $detalle->hora ? \Carbon\Carbon::parse($detalle->hora)->format('H:i') : '',
-            $detalle->tipo_entidad === 'P' ? 'PERSONA' : 'VEHÍCULO',
-            $detalle->tipo_documento == 1 ? 'DNI' : ($detalle->tipo_documento == 2 ? 'RUC' : ''),
-            $detalle->documento ?? '',
-            strtoupper($detalle->nombre ?? ''),
-            strtoupper($detalle->placa ?? ''),
-            $this->getTipoVehiculo($detalle->tipo_vehiculo),
-            $detalle->trae_carga ? 'SÍ' : 'NO',
-            $this->getTipoCarga($detalle->tipo_carga),
-            strtoupper($detalle->destino ?? ''),
-            strtoupper($detalle->ocurrencias ?? ''),
-            $detalle->etiqueta ? strtoupper($detalle->etiqueta->nombre) : '',
-            $detalle->controlGarita ? ($detalle->controlGarita->turno == 0 ? 'DÍA' : 'NOCHE') : '',
-            $detalle->controlGarita ? strtoupper($detalle->controlGarita->unidad) : '',
-            $detalle->usuario ? strtoupper($detalle->usuario->name) : '',
-            $detalle->created_at ? $detalle->created_at->format('d/m/Y H:i:s') : '',
+            'N' => 50,
         ];
     }
 
-    /**
-     * Aplica estilos a la hoja
-     */
     public function styles(Worksheet $sheet)
     {
+        $ultimaFila = $sheet->getHighestRow();
+        $rangoTotal = 'A1:P' . $ultimaFila;
         return [
-            // Estilo del encabezado
             1 => [
                 'font' => [
-                    'bold' => true,
-                    'size' => 12,
+                    'bold' => true, 
                     'color' => ['rgb' => 'FFFFFF'],
-                ],
+                    'size' => 12,
+                ], 
                 'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '4472C4'],
+                    'fillType' => FILL::FILL_SOLID, 
+                    'startColor' => ['rgb' => '2C3E50']
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
                     'vertical' => Alignment::VERTICAL_CENTER,
                 ],
-                'borders' => [
-                    'allBorders' => [
-                        'borderStyle' => Border::BORDER_THIN,
-                    ],
+                'row_height' => 30,
+                // 'borders' => [
+                //     'allBorders' => [
+                //         'borderStyle' => Border::BORDER_THIN,
+                //     ],
+                // ],
+            ],
+            $rangoTotal => [
+                // 'borders' => [
+                //     'allBorders' => [
+                //         'borderStyle' => Border::BORDER_THIN,
+                //         'color' => ['rgb' => '000000'],
+                //     ],
+                // ],
+                'alignment' => [
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                ],
+            ],
+            'N' => [
+                'alignment' => [
+                    'wrapText' => false,
+                    'vertical' => Alignment::VERTICAL_TOP,
                 ],
             ],
         ];
     }
 
-    /**
-     * Título de la hoja
-     */
-    public function title(): string
-    {
-        return $this->tipo === 'E' ? 'Entradas' : 'Salidas';
-    }
-
-    /**
-     * Helper para tipo de vehículo
-     */
-    private function getTipoVehiculo($tipo)
-    {
-        $tipos = [
-            1 => 'AUTO',
-            2 => 'MINIVAN',
-            3 => 'CAMIONETA',
-            4 => 'VOLQUETE',
-            5 => 'ENCAPSULADO',
-        ];
-
-        return $tipos[$tipo] ?? '';
-    }
-
-    /**
-     * Helper para tipo de carga
-     */
-    private function getTipoCarga($tipo)
-    {
-        $tipos = [
-            1 => 'MINERAL CHANCADO',
-            2 => 'MINERAL A GRANEL',
-        ];
-
-        return $tipos[$tipo] ?? '';
-    }
+    // public function title(): string
+    // {
+    //     switch ($this->tipo) {
+    //         case 'E':
+    //             return 'Entradas';
+    //         case 'S':
+    //             return 'Salidas';
+    //         default:
+    //             return 'General';
+    //     }
+    // }
 }

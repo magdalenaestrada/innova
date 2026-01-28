@@ -81,8 +81,12 @@ class User extends Authenticatable
         return $this->hasMany(DetalleControlGarita::class, foreignKey: 'usuario_id');
     }
 
-    // public function agente()
-    // {
-    //     return $this->hasMany(CgAgentes::class, foreignKey: 'usuarios_id');
-    // }
+    public function agentes()
+    {
+        return $this->belongsToMany(
+            ControlGarita::class,
+            'cg_agentes',
+            'usuarios_id',
+            'control_garita_id');
+    }
 }

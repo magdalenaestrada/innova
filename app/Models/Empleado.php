@@ -29,7 +29,8 @@ class Empleado extends Model
         return $this->hasOne(User::class);
     }
 
-
-
-
+    public function diaLibre()
+    {
+        return $this->hasMany(DiaLibre::class, foreignKey: 'empleados_id');
+    }
 }

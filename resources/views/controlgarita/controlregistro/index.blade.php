@@ -29,6 +29,34 @@
         .tr-etiqueta:hover {
             background-color: var(--row-hover, rgba(0,0,0,0.03));
         }
+
+        /* Estilo para los botones de radio tipo 'Segmented Control' */
+        .btn-group-toggle .btn {
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .btn-group-toggle .btn.active {
+            background-color: #e2e8f0;
+            border-color: #cbd5e0;
+            color: #2d3748;
+            font-weight: 700;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        }
+        
+        /* Clase auxiliar para botones blancos limpios */
+        .btn-white {
+            background-color: #fff;
+            border-color: #ced4da;
+        }
+
+        /* Ajuste del botón de Excel tuyo para que no se rompa en flexbox */
+        .button_export-excel {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: calc(2.25rem + 2px);
+            text-decoration: none;
+        }
     </style>
 @endpush
 
@@ -53,11 +81,6 @@
 
         {{-- Cabecera --}}
         <div class="row d-flex justify-content-between align-items-center">
-            {{-- audio --}}
-            {{-- <audio id="miAudio">
-                <source src="{{ asset('images/Se Encendio el Beeper.mp3') }}" type="audio/mpeg">
-                Tu navegador no soporta el elemento de audio.
-            </audio> --}}
             <div class="loader">
                 {{ __('GARITA DE CONTROL') }}
             </div>
@@ -73,7 +96,6 @@
                         // Margen de tolerancia: ej. permitir cerrar 15 min antes si quieres
                         // $puedeCerrar = \Carbon\Carbon::now()->gte($finProgramado); 
                         
-                        // Si es admin
                         if(Auth::user()->can('end cg-turn early')) {
                             $puedeCerrar = true;
                         }
@@ -167,13 +189,13 @@
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="row align-items-center mb-3">
+                    {{-- <div class="row align-items-center mb-3">
                         <div class="col-md-6">
                             <input style="margin: 20px 0 0 20px" type="text" name="searcht" id="cg-search"
                                 class="input-search form-control" placeholder="BUSCAR AQUÍ...">
                         </div>
                         <div class="col-md-6 d-flex justify-content-end">
-                            <a href="#" style="margin: 0 20px 0 0" class="button_export-excel" data-toggle="modal" data-target="#ModalExport">
+                            <a href="#" style="margin: 0 20px 0 0" class="button_export-excel" data-toggle="modal" data-target="#ModalExportExcel">
                                 <span class="button__text">
                                     <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                         viewBox="0 0 50 50">
@@ -229,8 +251,96 @@
                             </button>
                         </div>
                         @include('controlgarita.controlregistro.modal.etiqueta')
-                    </div>
+                    </div> --}}
                     <div class="card-body">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                            <div class="col-md-5 pl-0">
+                                <input type="text" name="searcht" id="cg-search"
+                                    class="input-search form-control" 
+                                    placeholder="BUSCAR AQUÍ..."
+                                    style="height: calc(2.25rem + 2px);">
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-outline-secondary mr-2" type="button" data-toggle="collapse" data-target="#advancedFilters" aria-expanded="false" style="height: calc(2.25rem + 2px);">
+                                    <i class="fas fa-filter"></i> Filtros
+                                </button>
+                                <button class="btn btn-info btn-lbl-clr-cliente mr-2" data-toggle="modal" data-target="#ModalEtiqueta" style="height: calc(2.25rem + 2px);">
+                                    <i class="fas fa-tag"></i> Etiquetas
+                                </button>
+                                <a href="#" class="button_export-excel" data-toggle="modal" data-target="#ModalExportExcel">
+                                    <span class="button__text">
+                                        <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 50 50">
+                                            <path d="M28.8125 .03125L.8125 5.34375C.339844 5.433594 0 5.863281 0 6.34375L0 43.65625C0 44.136719 .339844 44.566406 .8125 44.65625L28.8125 49.96875C28.875 49.980469 28.9375 50 29 50C29.230469 50 29.445313 49.929688 29.625 49.78125C29.855469 49.589844 30 49.296875 30 49L30 1C30 .703125 29.855469 .410156 29.625 .21875C29.394531 .0273438 29.105469 -.0234375 28.8125 .03125ZM32 6L32 13L34 13L34 15L32 15L32 20L34 20L34 22L32 22L32 27L34 27L34 29L32 29L32 35L34 35L34 37L32 37L32 44L47 44C48.101563 44 49 43.101563 49 42L49 8C49 6.898438 48.101563 6 47 6ZM36 13L44 13L44 15L36 15ZM6.6875 15.6875L11.8125 15.6875L14.5 21.28125C14.710938 21.722656 14.898438 22.265625 15.0625 22.875L15.09375 22.875C15.199219 22.511719 15.402344 21.941406 15.6875 21.21875L18.65625 15.6875L23.34375 15.6875L17.75 24.9375L23.5 34.375L18.53125 34.375L15.28125 28.28125C15.160156 28.054688 15.035156 27.636719 14.90625 27.03125L14.875 27.03125C14.8125 27.316406 14.664063 27.761719 14.4375 28.34375L11.1875 34.375L6.1875 34.375L12.15625 25.03125ZM36 20L44 20L44 22L36 22ZM36 27L44 27L44 29L36 29ZM36 35L44 35L44 37L36 37Z"></path>
+                                        </svg>
+                                        Reporte
+                                    </span>
+                                    <span class="button__icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 35" id="bdd05811-e15d-428c-bb53-8661459f9307" data-name="Layer 2" class="svg">
+                                            <path d="M17.5,22.131a1.249,1.249,0,0,1-1.25-1.25V2.187a1.25,1.25,0,0,1,2.5,0V20.881A1.25,1.25,0,0,1,17.5,22.131Z"></path>
+                                            <path d="M17.5,22.693a3.189,3.189,0,0,1-2.262-.936L8.487,15.006a1.249,1.249,0,0,1,1.767-1.767l6.751,6.751a.7.7,0,0,0,.99,0l6.751-6.751a1.25,1.25,0,0,1,1.768,1.767l-6.752,6.751A3.191,3.191,0,0,1,17.5,22.693Z"></path>
+                                            <path d="M31.436,34.063H3.564A3.318,3.318,0,0,1,.25,30.749V22.011a1.25,1.25,0,0,1,2.5,0v8.738a.815.815,0,0,0,.814.814H31.436a.815.815,0,0,0,.814-.814V22.011a1.25,1.25,0,1,1,2.5,0v8.738A3.318,3.318,0,0,1,31.436,34.063Z"></path>
+                                        </svg>
+                                    </span>
+                                </a>
+                                @include('controlgarita.controlregistro.modal.etiqueta')
+                            </div>
+                        </div>
+
+                        <div class="collapse" id="advancedFilters">
+                            <div class="card card-body bg-light border-0 p-3 mb-3" style="border-radius: 8px;">
+                                <div class="row">
+                                    <div class="col-md-3 mb-2">
+                                        <label class="small font-weight-bold text-muted mb-1">MOVIMIENTO</label>
+                                        <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+                                            <label class="btn btn-white border active btn-sm">
+                                                <input type="radio" name="filter_mov" value="ALL" checked onchange="aplicarFiltros()"> Todos
+                                            </label>
+                                            <label class="btn btn-white border text-success btn-sm">
+                                                <input type="radio" name="filter_mov" value="E" onchange="aplicarFiltros()"> Entrada
+                                            </label>
+                                            <label class="btn btn-white border text-secondary btn-sm">
+                                                <input type="radio" name="filter_mov" value="S" onchange="aplicarFiltros()"> Salida
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 mb-2">
+                                        <label class="small font-weight-bold text-muted mb-1">ENTIDAD</label>
+                                        <select id="filter_entidad" class="form-control form-control-sm" onchange="aplicarFiltros()">
+                                            <option value="">Todas</option>
+                                            <option value="P">Personas</option>
+                                            <option value="V">Vehículos</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <label class="small font-weight-bold text-muted mb-1">RANGO DE FECHAS</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="date" id="date_from" class="form-control" placeholder="Desde" onchange="aplicarFiltros()">
+                                            <div class="input-group-prepend input-group-append">
+                                                <span class="input-group-text bg-white border-left-0 border-right-0">a</span>
+                                            </div>
+                                            <input type="date" id="date_to" class="form-control" placeholder="Hasta" onchange="aplicarFiltros()">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <label class="small font-weight-bold text-muted mb-1">RANGO HORARIO</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="time" id="time_from" class="form-control" onchange="aplicarFiltros()">
+                                            <div class="input-group-prepend input-group-append">
+                                                <span class="input-group-text bg-white border-left-0 border-right-0">-</span>
+                                            </div>
+                                            <input type="time" id="time_to" class="form-control" onchange="aplicarFiltros()">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-12 text-right">
+                                        <button class="btn btn-link btn-sm text-muted p-0" onclick="limpiarFiltros()">
+                                            <i class="fas fa-times-circle"></i> Limpiar filtros
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <table id="det-control-garita-table" class="table table-hover">
                             <thead>
                                 <tr>
@@ -336,6 +446,62 @@
 @section('js')
     <script type="text/javascript">
         $(() => {
+            function aplicarFiltros() {
+                const mov = $('input[name="filter_mov"]:checked').val();
+                const entidad = $('#filter_entidad').val();
+                const dateFrom = $('#date_from').val();
+                const dateTo = $('#date_to').val();
+                const timeFrom = $('#time_from').val();
+                const timeTo = $('#time_to').val();
+
+                $('#det-control-garita-table tbody tr').each(function() {
+                    const row = $(this);
+                    
+                    // 1. Obtener datos de la fila (Necesitas data attributes en el TR)
+                    // Asegúrate de que tu TR tenga: data-tipo, data-entidad, data-fecha, data-hora
+                    // Ejemplo: <tr data-tipo="E" data-entidad="P" data-fecha="2023-10-27" data-hora="14:30">
+                    
+                    // NOTA: Debes agregar estos data-attributes en tu blade si no existen.
+                    // Si no quieres modificar el blade, tendrías que leer el texto de los TDs, 
+                    // lo cual es menos preciso.
+                    
+                    const rowTipo = row.data('tipo'); 
+                    // const rowEntidad = row.find('td:eq(4)').text().trim().includes('VEHÍCULO') ? 'V' : 'P'; // Ejemplo lectura manual
+                    // Se recomienda usar data-attributes para precisión.
+
+                    let mostrar = true;
+
+                    // Filtro Movimiento
+                    if (mov !== 'ALL' && rowTipo !== mov) mostrar = false;
+
+                    // Filtro Entidad (Ejemplo simplificado, requiere data-entidad en TR)
+                    // if (entidad && rowEntidad !== entidad) mostrar = false;
+
+                    // Filtro Fechas
+                    // ... Lógica de comparación de fechas ...
+
+                    if (mostrar) row.show();
+                    else row.hide();
+                });
+            }
+
+            function limpiarFiltros() {
+                $('input[name="filter_mov"][value="ALL"]').prop('checked', true).change();
+                $('#filter_entidad').val('');
+                $('#date_from').val('');
+                $('#date_to').val('');
+                $('#time_from').val('');
+                $('#time_to').val('');
+                
+                $('#det-control-garita-table tbody tr').show();
+            }
+
+            $(document).on('change', 'input[name="filter_mov"]', function() {
+                $('label.btn').removeClass('active');
+                $(this).closest('label').addClass('active');
+                aplicarFiltros();
+            });
+            
             $('#cg-search').on('input', function(e) {
                 e.preventDefault();
                 let search_string = $(this).val();

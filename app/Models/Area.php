@@ -12,4 +12,9 @@ class Area extends Model
     protected $table = 'areas';
 
     protected $fillable = ['nombre', 'creador_id'];
+
+    public function diaLibre() 
+    {
+        return $this->hasMany(DiaLibre::class, foreignKey: 'areas_id');
+    }
 }

@@ -70,14 +70,6 @@ class DetalleControlGaritaController extends Controller
         ));
     }
 
-    public function indexS()
-    {
-        $detalles = DetalleControlGarita::orderBy('id', 'desc')
-            ->where('tipo_movimiento', 'S')
-            ->get();
-        return view('controlgarita.salida.index', compact('detalles'));
-    }
-
     /**
      * Show the form for creating a new resource.
      */
@@ -221,49 +213,21 @@ class DetalleControlGaritaController extends Controller
         //
     }
 
-    public function export_excel(Request $request)
+    public function exportExcelCustom(Request $request)
     {
-        $tipo_movimiento = $request->input('tipo_movimiento', 'E');
+        $filtros = [
+            'tipo_movimiento' => $request->tipo_movimiento,
+            'tipo_entidad'    => $request->tipo_entidad,
+            'fecha_inicio'    => $request->fecha_inicio,
+            'fecha_fin'       => $request->fecha_fin,
+            'hora_inicio'     => $request->hora_inicio,
+            'hora_fin'        => $request->hora_fin,
+            'usuario_id'      => $request->usuario_id,
+        ];
 
-        // Opción 1: Exportar filtrado por tipo
-        return Excel::download(
-            new DetalleControlGaritaExport(null, $tipo_movimiento), 
-            $tipo_movimiento === 'E' ? 'entradas_garita.xlsx' : 'salidas_garita.xlsx'
-        );
-    }
+        $nombreArchivo = 'reporte_garita_' . now()->format('d_m_Y_His') . '.xlsx';
 
-    // Método adicional para exportar con filtros personalizados
-    public function export_excel_custom(Request $request)
-    {
-        $query = DetalleControlGarita::with(['controlGarita', 'usuario', 'etiqueta']);
-
-        // Filtros opcionales
-        if ($request->has('tipo_movimiento')) {
-            $query->where('tipo_movimiento', $request->tipo_movimiento);
-        }
-
-        if ($request->has('fecha_inicio') && $request->has('fecha_fin')) {
-            $query->whereBetween('created_at', [
-                $request->fecha_inicio . ' 00:00:00',
-                $request->fecha_fin . ' 23:59:59'
-            ]);
-        }
-
-        if ($request->has('tipo_entidad')) {
-            $query->where('tipo_entidad', $request->tipo_entidad);
-        }
-
-        if ($request->has('usuario_id')) {
-            $query->where('usuario_id', $request->usuario_id);
-        }
-
-        $detalles = $query->orderBy('created_at', 'desc')->get();
-        $tipo = $request->input('tipo_movimiento', 'E');
-
-        return Excel::download(
-            new DetalleControlGaritaExport($detalles, $tipo),
-            'reporte_garita_' . date('Y-m-d_His') . '.xlsx'
-        );
+        return Excel::download(new DetalleControlGaritaExport($filtros), $nombreArchivo);
     }
 
     public function searchCodigo(Request $request)

@@ -695,7 +695,7 @@ return [
         [
             'text' => 'REGISTRO DE DÍAS LIBRES',
             'icon_color' => 'green',
-            'url' => '/controlgarita/out',
+            'url' => '/diaslibres',
         //    'can' => 'view garita',
         ],
 

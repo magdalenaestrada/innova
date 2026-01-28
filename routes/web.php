@@ -25,6 +25,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClienteCodigoController;
 use App\Http\Controllers\ControlGaritaController;
 use App\Http\Controllers\DetalleControlGaritaController;
+use App\Http\Controllers\DiaLibreController;
 use App\Http\Controllers\InventarioingresoController;
 use App\Http\Controllers\InventariosalidaController;
 use App\Http\Controllers\ProductosFamiliaController;
@@ -180,8 +181,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('export-excel-otrascajasreporte/{id}', [TsReposicioncajaController::class, 'export_excel_otra'])->name('tsotrascajas.export-excel');
     Route::get('export-excel-reportescuentas', [TsReporteDiarioCuentasController::class, 'export_excel'])->name('tsreportescuentas.export-excel');
     Route::get('export-contable-excel-reportescuentas', [TsReporteDiarioCuentasController::class, 'export_excel_contable'])->name('tsreporteContablecuentas.export-excel');
-    Route::get('export-excel-detallecontrolgarita', [DetalleControlGaritaController::class, 'export_excel'])->name('detcontrolgarita.export-excel');
-    Route::post('export-excel-custom-detallecontrolgarita', [DetalleControlGaritaController::class, 'export_excel_custom'])->name('detcontrolgarita.export-excel-custom');
+    Route::post('export-excel-custom-detallecontrolgarita', [DetalleControlGaritaController::class, 'exportExcelCustom'])->name('detcontrolgarita.export-excel-custom');
 
     //ANULAR ROUTES
     Route::get('/inventarioingresos/{id}/anular', [InventarioingresoController::class, 'anular'])->name('inventarioingresos.anular');
@@ -266,7 +266,6 @@ Route::group(['middleware' => ['auth']], function () {
 
     //GARITA CONTROLS
     Route::get('/controlgarita', [DetalleControlGaritaController::class, 'index'])->name('detcontrolgarita.index');
-    Route::get('/controlgarita/out', [DetalleControlGaritaController::class, 'indexS'])->name('detcontrolgarita.salida.index');
     Route::post('/controlgarita/guardar', [DetalleControlGaritaController::class, 'store'])->name('detcontrolgarita.guardar');
     Route::put('/controlgarita/editar/{id}', [DetalleControlGaritaController::class, 'update'])->name('detcontrolgarita.editar');
     Route::get('/controlgarita/search', [DetalleControlGaritaController::class, 'searchCodigo'])->name('detcontrolgarita.search');
@@ -283,6 +282,12 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::get('/controlgarita/tipo-vehiculo', [TipoVehiculoController::class, 'index'])->name('controlgarita.tipo-vehiculo.index');
     Route::post('/controlgarita/tipo-vehiculo/guardar', [TipoVehiculoController::class, 'store'])->name('controlgarita.tipo-vehiculo.store');
+
+    //DIAS LIBRES
+    Route::get('/diaslibres', [DiaLibreController::class, 'index'])->name('dialibre.index');
+    Route::post('/diaslibres/guardar', [DiaLibreController::class, 'store'])->name('dialibre.guardar');
+    Route::put('/diaslibres/editar/{id}', [DiaLibreController::class, 'update'])->name('dialibre.editar');
+    Route::get('/diaslibres/search', [DiaLibreController::class, 'searchCodigo'])->name('dialibre.search');
 
     Route::get('/salidascuentas/datatable', [TsSalidacuentaController::class, 'datatable'])->name('salidascuentas.datatable');
 });

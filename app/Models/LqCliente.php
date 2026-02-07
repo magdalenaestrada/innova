@@ -13,12 +13,30 @@ class LqCliente extends Model
         'documento',
         'nombre',
         'creador_id',
+        'nombre_r_info',
+        'r_info_prestado',
         'r_info',
-        'fecha_inicio_contrato',
-        'fecha_fin_contrato',
         'estado',
         'observacion',
-        'codigo',
-        'r_info_prestado'
+        'codigo'
     ];
+
+    protected $casts = [
+        'r_info_prestado' => 'boolean',
+    ];
+
+    public function contrato()
+    {
+        return $this->hasOne(Contrato::class, "cliente_id");
+    }
+
+    public function representantes()
+    {
+        return $this->hasMany(RepresentanteLegal::class, "cliente_id");
+    }
+
+    public function contactos()
+    {
+        return $this->hasMany(ListaContacto::class, "cliente_id");
+    }
 }

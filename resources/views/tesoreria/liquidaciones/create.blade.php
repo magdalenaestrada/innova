@@ -527,7 +527,7 @@
         function update_with_detraccion() {
 
             const isChecked = document.getElementById('cbx-12').checked;
-            
+
             let importe_total_dolares = isNaN(parseFloat($('#importe_total_dolares').val())) ? 0 : parseFloat(
                 $('#importe_total_dolares').val());
 
@@ -586,11 +586,11 @@
                 var total_dolares = discountadelantos(liq_dolares, descuento_por_adelantos_dolares);
                 if (otros_descuentos_dolares) {
 
-                    if(isChecked){
+                    if (isChecked) {
                         total_dolares = 0.9 * total_dolares
                     }
 
-                    
+
 
                     total_dolares = discountothers(total_dolares, otros_descuentos_dolares)
                 }
@@ -608,9 +608,9 @@
             if (liq_soles) {
                 var total_soles = discountadelantos(liq_soles, descuento_por_adelantos_soles);
                 if (otros_descuentos_soles) {
-                    if(isChecked){
+                    if (isChecked) {
                         total_soles = 0.9 * total_soles
-                    } 
+                    }
 
                     total_soles = discountothers(total_soles, otros_descuentos_soles)
                 }
@@ -895,6 +895,22 @@
                 var value = $(this).val();
                 $(this).toggleClass('is-valid', value.trim().length > 0);
                 $(this).toggleClass('is-invalid', value.trim().length === 0);
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $('#tipo_comprobante').on('change', function() {
+                const tipo = $(this).val();
+
+                if (['1', '8', '9'].includes(tipo)) {
+                    $('#documento').prop('required', true);
+                    $('#nombre').prop('required', true);
+                } else {
+                    $('#documento').prop('required', false).val('');
+                    $('#nombre').prop('required', false).val('');
+                }
             });
         });
     </script>

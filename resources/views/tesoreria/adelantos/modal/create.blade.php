@@ -40,7 +40,7 @@
                                     </option>
                                 @endforeach
                             </select>
-                            @error('tipocomprobante')
+                            @error('tipo_comprobante_id')
                                 <div class="invalid-feedback">
                                     {{ $message }}
                                 </div>
@@ -57,7 +57,7 @@
                         <div class="form input-group col-md-4">
                             <input name="documento" id="documento" class="form-control form-control-sm"
                                 placeholder="DOCUMENTO REPRESENTANTE..." type="text">
-                                <button class="btn btn-sm btn-success" type="button" style="width:30.5px; height:30.5px"
+                            <button class="btn btn-sm btn-success" type="button" style="width:30.5px; height:30.5px"
                                 id="buscar_beneficiario_btn">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
                                     viewBox="0 0 25 25" style="fill: rgba(255, 255, 255, 1);transform: ;msFilter:;">
@@ -168,14 +168,13 @@
                             @enderror
                         </div>
 
-                        
+
                         <div class="form col-md-4  mb-1">
                             <label for="nro_operacion" class="text-sm">
                                 {{ __('NRO OPERACIÓN') }}
                             </label>
-                            <input name="nro_operacion" id="nro_operacion"
-                                class="form-control form-control-sm" placeholder="NRO OPERACIÓN..."
-                                type="text">
+                            <input name="nro_operacion" id="nro_operacion" class="form-control form-control-sm"
+                                placeholder="NRO OPERACIÓN..." type="text">
                             <span class="input-border"></span>
                         </div>
 
@@ -240,8 +239,9 @@
                             <label for="monto" class="text-sm">
                                 {{ __('SIN DETRACCIÓN SOLES') }}
                             </label>
-                            <input name="total_sin_detraccion_soles" id="detraccion_soles" class="form-control form-control-sm"
-                                disabled placeholder="TOTAL EN SOLES" type="text">
+                            <input name="total_sin_detraccion_soles" id="detraccion_soles"
+                                class="form-control form-control-sm" disabled placeholder="TOTAL EN SOLES"
+                                type="text">
                             <span class="input-border"></span>
                         </div>
 
@@ -251,7 +251,8 @@
                             </label>
                             <div class="checkbox-wrapper-12">
                                 <div class="cbx">
-                                    <input id="cbx-12" type="checkbox" name="detraccion_checked" onclick="toggleDetraccionFields()" />
+                                    <input id="cbx-12" type="checkbox" name="detraccion_checked"
+                                        onclick="toggleDetraccionFields()" />
                                     <label for="cbx-12"></label>
                                     <svg width="15" height="14" viewBox="0 0 15 14" fill="none">
                                         <path d="M2 8.36364L6.23077 12L13 2"></path>
@@ -318,6 +319,21 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#tipo_comprobante').on('change', function() {
+                const tipo = $(this).val();
+
+                if (['1', '8', '9'].includes(tipo)) {
+                    $('#documento').prop('required', true);
+                    $('#nombre').prop('required', true);
+                } else {
+                    $('#documento').prop('required', false).val('');
+                    $('#nombre').prop('required', false).val('');
+                }
+            });
+        });
+    </script>
 
     <script>
         $(document).ready(function() {
@@ -357,7 +373,7 @@
                 const tipocambio = parseFloat(document.getElementById('tipocambio').value);
                 const total = parseFloat(document.getElementById('total').value);
 
-                if (!isNaN(tipocambio) && !isNaN(total) ) {
+                if (!isNaN(tipocambio) && !isNaN(total)) {
                     dolaresInput.disabled = false; // Enable dolares input if tipocambio is valid
                     solesInput.disabled = false; // Enable soles input if tipocambio is valid
                 } else {
@@ -372,7 +388,7 @@
                 solesInput.disabled = true;
             }
         }
-    
+
         $(document).on("input", '#tipocambio, #monto, #total', function() {
             var tipocambio = parseFloat($('#tipocambio').val()); // Convert to a float
             var monto = parseFloat($('#monto').val()); // Convert to a float
@@ -398,8 +414,10 @@
                 // Calculate 110% for the two fields upwards
                 if (detraccion_dolares && (!isNaN(tipocambio)) && (!isNaN(monto))) {
 
-                    var detDolares = Math.floor(monto * 1.111111111111111 * 100) / 100; // 110% of monto in dolares, rounded to two decimal places
-                    var detSoles = Math.floor(total * 1.1111111111111111 * 100) / 100; // 110% of total in soles, rounded to two decimal places
+                    var detDolares = Math.floor(monto * 1.111111111111111 * 100) /
+                        100; // 110% of monto in dolares, rounded to two decimal places
+                    var detSoles = Math.floor(total * 1.1111111111111111 * 100) /
+                        100; // 110% of total in soles, rounded to two decimal places
 
                     // Set 110% values
                     $('#detraccion_dolares').val(detDolares);
@@ -422,20 +440,20 @@
             var tipocambio = parseFloat($('#tipocambio').val()); // Get and parse the tipocambio value
             var total = parseFloat($('#total').val()); // Get and parse the tipocambio value
 
-            if (!isNaN(tipocambio) ) {
+            if (!isNaN(tipocambio)) {
                 // If tipocambio is valid, enable 'monto' and 'total' fields for input
                 $('#monto').prop('disabled', false);
                 $('#total').prop('disabled', false);
 
                 // Check if detraccion fields are visible and enable them if so
-                if ($('#detraccionDolaresField').is(':visible') && !isNaN(total) ) {
+                if ($('#detraccionDolaresField').is(':visible') && !isNaN(total)) {
                     $('#detraccion_dolares').prop('disabled', false);
-                }else {
-                    $('#detraccion_dolares').prop('disabled', true); 
+                } else {
+                    $('#detraccion_dolares').prop('disabled', true);
                 }
-                if ($('#detraccionSolesField').is(':visible') && !isNaN(total) ) {
+                if ($('#detraccionSolesField').is(':visible') && !isNaN(total)) {
                     $('#detraccion_soles').prop('disabled', false);
-                }else{
+                } else {
                     $('#detraccion_soles').prop('disabled', true);
                 }
             } else {
@@ -446,7 +464,7 @@
                 $('#detraccion_soles').prop('disabled', true);
             }
         });
-    
+
         $(document).on("input", "#sociedad", function() {
             var sociedad = $(this).val();
             var url = "{{ route('get.sociedad.nombre.by.code', ['sociedad' => ':sociedad']) }}";
@@ -501,6 +519,12 @@
 
         $('.create-adelanto').submit(function(e) {
             e.preventDefault();
+
+            if (!this.checkValidity()) {
+                this.reportValidity();
+                return;
+            }
+
             Swal.fire({
                 title: '¿Crear Adelanto?',
                 icon: 'info',
@@ -576,28 +600,6 @@
                 $(this).toggleClass('is-invalid', value.trim().length === 0);
             });
         });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-       
     </script>
 
 

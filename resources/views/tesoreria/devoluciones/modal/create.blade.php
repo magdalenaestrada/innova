@@ -32,14 +32,14 @@
                                 placeholder="Documento de quien entrega..." type="text">
                             <span class="input-border"></span>
                             <button class="btn btn-sm btn-success" type="button" style="width:30.5px; height:30.5px"
-                            id="buscar_beneficiario_btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
-                                viewBox="0 0 25 25" style="fill: rgba(255, 255, 255, 1);transform: ;msFilter:;">
-                                <path
-                                    d="M19.023 16.977a35.13 35.13 0 0 1-1.367-1.384c-.372-.378-.596-.653-.596-.653l-2.8-1.337A6.962 6.962 0 0 0 16 9c0-3.859-3.14-7-7-7S2 5.141 2 9s3.14 7 7 7c1.763 0 3.37-.66 4.603-1.739l1.337 2.8s.275.224.653.596c.387.363.896.854 1.384 1.367l1.358 1.392.604.646 2.121-2.121-.646-.604c-.379-.372-.885-.866-1.391-1.36zM9 14c-2.757 0-5-2.243-5-5s2.243-5 5-5 5 2.243 5 5-2.243 5-5 5z">
-                                </path>
-                            </svg>
-                        </button>
+                                id="buscar_beneficiario_btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
+                                    viewBox="0 0 25 25" style="fill: rgba(255, 255, 255, 1);transform: ;msFilter:;">
+                                    <path
+                                        d="M19.023 16.977a35.13 35.13 0 0 1-1.367-1.384c-.372-.378-.596-.653-.596-.653l-2.8-1.337A6.962 6.962 0 0 0 16 9c0-3.859-3.14-7-7-7S2 5.141 2 9s3.14 7 7 7c1.763 0 3.37-.66 4.603-1.739l1.337 2.8s.275.224.653.596c.387.363.896.854 1.384 1.367l1.358 1.392.604.646 2.121-2.121-.646-.604c-.379-.372-.885-.866-1.391-1.36zM9 14c-2.757 0-5-2.243-5-5s2.243-5 5-5 5 2.243 5 5-2.243 5-5 5z">
+                                    </path>
+                                </svg>
+                            </button>
                         </div>
 
                         <div class="form col-md-8 mb-2">
@@ -244,8 +244,6 @@
     </div>
 </div>
 @push('js')
-
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
@@ -259,9 +257,23 @@
             });
         });
     </script>
-
     <script>
-       $(document).ready(function() {
+        $(document).ready(function() {
+            $('#tipo_comprobante').on('change', function() {
+                const tipo = $(this).val();
+
+                if (['1', '8', '9'].includes(tipo)) {
+                    $('#documento').prop('required', true);
+                    $('#nombre').prop('required', true);
+                } else {
+                    $('#documento').prop('required', false).val('');
+                    $('#nombre').prop('required', false).val('');
+                }
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
             function isRucOrDni(value) {
                 return value.length === 8 || value.length === 11;
             }
@@ -470,103 +482,92 @@
 
 
         $(document).on('change', '#checkbox_adelantos_container input[type="checkbox"], #cuenta, #sociedad', function() {
-                    let sum_dolares = 0;
-                    let sum_soles = 0;
-                    let cuenta_id = $('#cuenta').val();
-                    let cuenta = cuentas.find(c => c.id == cuenta_id);
-                    let tipomoneda = cuenta.tipomoneda.nombre;
+            let sum_dolares = 0;
+            let sum_soles = 0;
+            let cuenta_id = $('#cuenta').val();
+            let cuenta = cuentas.find(c => c.id == cuenta_id);
+            let tipomoneda = cuenta.tipomoneda.nombre;
 
 
-                    $('#checkbox_adelantos_container input[type="checkbox"]:checked').each(
-                        function() {
+            $('#checkbox_adelantos_container input[type="checkbox"]:checked').each(
+                function() {
 
-                            let dol_monto = 0;
-                            let sol_monto = 0;
-                            
-                            var adelanto_id = $(this).val();
+                    let dol_monto = 0;
+                    let sol_monto = 0;
 
-                            
-                            let adelanto = adelantos.find(a => a.id == adelanto_id);
+                    var adelanto_id = $(this).val();
 
 
-
-                            if (adelanto.salidacuenta.cuenta.tipomoneda.nombre == 'DOLARES') {
-
-
-                                if (adelanto.total_sin_detraccion) {
-                                    //VERIFICA SI EL ADELANTO ES EN DOLARES
-                                    dol_monto = adelanto
-                                        .total_sin_detraccion //OBTIENE EL MONTO DEL ADELANTO EN DOLARES (EL MONTO ESTÁ EN REALIDAD ALMACENADO EN LA TABLA DE SALIDAS DE LAS CUENTAS, PERO EXISTE UNA RELACIÓN ENTRE LAS SALIDAS DE LAS CUENTAS Y LOS ADELANTOS)
-                                    sol_monto = adelanto.total_sin_detraccion * adelanto
-                                        .tipo_cambio // HACE LA CONVERSION 
-                                } else {
-
-                                    dol_monto = adelanto.salidacuenta
-                                        .monto //OBTIENE EL MONTO DEL ADELANTO EN DOLARES (EL MONTO ESTÁ EN REALIDAD ALMACENADO EN LA TABLA DE SALIDAS DE LAS CUENTAS, PERO EXISTE UNA RELACIÓN ENTRE LAS SALIDAS DE LAS CUENTAS Y LOS ADELANTOS)
-                                    sol_monto = adelanto.salidacuenta.monto * adelanto
-                                        .tipo_cambio // HACE LA CONVERSION 
-
-                                }
-
-
-                            } else { // EN CASO EL ADELANTO SE HIZO DESDE LA CUENTA EN SOLES
-
-                                if (adelanto.total_sin_detraccion) {
-                                    dol_monto = Math.round((adelanto.total_sin_detraccion / adelanto.tipo_cambio) *
-                                            100) /
-                                        100; // HACE LA CONVERSION DE SOLES A DOLARES
-                                    sol_monto = adelanto.total_sin_detraccion // EL MONTO EN SOLES ES EL MISMO
-                                } else {
-
-                                    dol_monto = Math.round((adelanto.salidacuenta.monto / adelanto.tipo_cambio) * 100) /
-                                        100; // HACE LA CONVERSION DE SOLES A DOLARES
-                                    sol_monto = adelanto.salidacuenta.monto // EL MONTO EN SOLES ES EL MISMO
-                                }
+                    let adelanto = adelantos.find(a => a.id == adelanto_id);
 
 
 
-                            }
+                    if (adelanto.salidacuenta.cuenta.tipomoneda.nombre == 'DOLARES') {
 
 
-
-                            if (adelanto) {
-                                sum_dolares += parseFloat(dol_monto) ||
-                                0; // SE SUMA AL TOTAL DEL DESCUENTO EN DOLARES EL MONTO EN DOLARES DEL ADELANTO
-                                sum_soles += parseFloat(sol_monto) ||
-                                    0; // SE SUMA AL TOTAL DEL DESCUENTO EN SOLES EL MONTO EN SOLES DEL ADELANTO
-                                
-                            }
-
-
-                        });
-
-
-
-
-                        if (tipomoneda == 'DOLARES') {
-                            $('#monto').val(''); //SE PASA LA SUMA AL  INPUT EN EL HTML
-
-                            $('#monto').val(sum_dolares.toFixed(2)); //SE PASA LA SUMA AL  INPUT EN EL HTML
-
+                        if (adelanto.total_sin_detraccion) {
+                            //VERIFICA SI EL ADELANTO ES EN DOLARES
+                            dol_monto = adelanto
+                                .total_sin_detraccion //OBTIENE EL MONTO DEL ADELANTO EN DOLARES (EL MONTO ESTÁ EN REALIDAD ALMACENADO EN LA TABLA DE SALIDAS DE LAS CUENTAS, PERO EXISTE UNA RELACIÓN ENTRE LAS SALIDAS DE LAS CUENTAS Y LOS ADELANTOS)
+                            sol_monto = adelanto.total_sin_detraccion * adelanto
+                                .tipo_cambio // HACE LA CONVERSION 
                         } else {
-                            $('#monto').val(''); //SE PASA LA SUMA AL  INPUT EN EL HTML
 
-                            $('#monto').val(sum_soles.toFixed(2)); //SE PASA LA SUMA AL  INPUT EN EL HTML
+                            dol_monto = adelanto.salidacuenta
+                                .monto //OBTIENE EL MONTO DEL ADELANTO EN DOLARES (EL MONTO ESTÁ EN REALIDAD ALMACENADO EN LA TABLA DE SALIDAS DE LAS CUENTAS, PERO EXISTE UNA RELACIÓN ENTRE LAS SALIDAS DE LAS CUENTAS Y LOS ADELANTOS)
+                            sol_monto = adelanto.salidacuenta.monto * adelanto
+                                .tipo_cambio // HACE LA CONVERSION 
 
                         }
 
 
-                    });
+                    } else { // EN CASO EL ADELANTO SE HIZO DESDE LA CUENTA EN SOLES
+
+                        if (adelanto.total_sin_detraccion) {
+                            dol_monto = Math.round((adelanto.total_sin_detraccion / adelanto.tipo_cambio) *
+                                    100) /
+                                100; // HACE LA CONVERSION DE SOLES A DOLARES
+                            sol_monto = adelanto.total_sin_detraccion // EL MONTO EN SOLES ES EL MISMO
+                        } else {
+
+                            dol_monto = Math.round((adelanto.salidacuenta.monto / adelanto.tipo_cambio) * 100) /
+                                100; // HACE LA CONVERSION DE SOLES A DOLARES
+                            sol_monto = adelanto.salidacuenta.monto // EL MONTO EN SOLES ES EL MISMO
+                        }
+
+
+
+                    }
+
+
+
+                    if (adelanto) {
+                        sum_dolares += parseFloat(dol_monto) ||
+                            0; // SE SUMA AL TOTAL DEL DESCUENTO EN DOLARES EL MONTO EN DOLARES DEL ADELANTO
+                        sum_soles += parseFloat(sol_monto) ||
+                            0; // SE SUMA AL TOTAL DEL DESCUENTO EN SOLES EL MONTO EN SOLES DEL ADELANTO
+
+                    }
+
+
+                });
+
+
+
+
+            if (tipomoneda == 'DOLARES') {
+                $('#monto').val(''); //SE PASA LA SUMA AL  INPUT EN EL HTML
+
+                $('#monto').val(sum_dolares.toFixed(2)); //SE PASA LA SUMA AL  INPUT EN EL HTML
+
+            } else {
+                $('#monto').val(''); //SE PASA LA SUMA AL  INPUT EN EL HTML
+
+                $('#monto').val(sum_soles.toFixed(2)); //SE PASA LA SUMA AL  INPUT EN EL HTML
+
+            }
+
+
+        });
     </script>
-
-
-
-
-
-
-
-
-
-
-
 @endpush

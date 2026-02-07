@@ -6,16 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('lq_clientes', function (Blueprint $table) {
             $table->boolean('r_info_prestado')->default(false);
             $table->string("r_info")->nullable();
-            $table->date("fecha_inicio_contrato")->nullable();
-            $table->date("fecha_fin_contrato")->nullable();
+            $table->string("nombre_r_info")->nullable();
             $table->char("estado")->nullable()->default("A");
             $table->string("observacion")->nullable();
         });

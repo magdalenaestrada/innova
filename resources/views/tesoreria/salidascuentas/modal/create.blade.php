@@ -22,11 +22,6 @@
                     @csrf
                     <div class="row">
 
-
-
-
-
-
                         <div class="form input-group mb-1 col-md-4">
                             <input name="documento" id="documento" class="form-control form-control-sm"
                                 placeholder="Documento del beneficiario..." type="text">
@@ -57,7 +52,7 @@
                                 {{ __('TIPO DE COMPROBANTE') }}
                             </label>
                             <br>
-                            <select name="tipo_comprobante_id"  id="tipo_comprobanteC"
+                            <select name="tipo_comprobante_id" id="tipo_comprobanteC"
                                 class="form-control form-control-sm buscador @error('tipo_comprobante') is-invalid @enderror"
                                 aria-label="" style="width: 100%">
                                 <option selected value="">
@@ -80,8 +75,8 @@
 
                         <div class="form col-md-4" style="margin-top: 28px">
                             <input name="comprobante_correlativo" id="comprobante_correlativo"
-                                class="form-control form-control-sm"
-                                placeholder="Correlativo del comprobante..." type="text">
+                                class="form-control form-control-sm" placeholder="Correlativo del comprobante..."
+                                type="text">
                             <span class="input-border"></span>
                         </div>
 
@@ -89,8 +84,8 @@
                             <label for="monto" class="text-sm">
                                 {{ __('NRO OPERACIÓN') }}
                             </label>
-                            <input name="nro_operacion" style="margin-top:-3px" id="monto" class="form-control form-control-sm"
-                                placeholder="Nro operación..."  type="text">
+                            <input name="nro_operacion" style="margin-top:-3px" id="monto"
+                                class="form-control form-control-sm" placeholder="Nro operación..." type="text">
                             <span class="input-border"></span>
                         </div>
 
@@ -199,3 +194,20 @@
         </div>
     </div>
 </div>
+@push('js')
+    <script>
+         $(document).ready(function() {
+            $('#tipo_comprobanteC').on('change', function() {
+                const tipo = $(this).val();
+
+                if (['1', '8', '9'].includes(tipo)) {
+                    $('#documento').prop('required', true);
+                    $('#nombre').prop('required', true);
+                } else {
+                    $('#documento').prop('required', false).val('');
+                    $('#nombre').prop('required', false).val('');
+                }
+            });
+        });
+    </script>
+@endpush

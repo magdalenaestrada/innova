@@ -31,12 +31,9 @@
     <script src="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@2.0.1/dist/js/multi-select-tag.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
     <!-- Custom script to handle document search -->
     <script>
-        
-
         $(document).ready(function() {
             function isRucOrDni(value) {
                 return value.length === 8 || value.length === 11;
@@ -124,9 +121,75 @@
                 $(this).toggleClass('is-invalid', value.trim().length === 0);
             });
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            function cargarNotificaciones() {
+                const badge = document.getElementById('notif-badge');
+                const items = document.getElementById('notif-items');
+
+                if (!badge || !items) return;
+
+                fetch('{{ route('notificaciones.contratos') }}')
+                    .then(res => res.json())
+                    .then(data => {
+                        // Badge
+                        if (data.total > 0) {
+                            badge.style.display = 'inline';
+                            badge.innerText = data.total;
+                        } else {
+                            badge.style.display = 'none';
+                        }
+
+                        // Items
+                        let html = '';
+                        if (data.por_vencer > 0) {
+                            html += `
+                        <a href="{{ route('lqclientes.index') }}?estado=por_vencer" class="dropdown-item">
+                            <i class="fas fa-exclamation-triangle text-warning mr-2"></i>
+                            Hay ${data.por_vencer} contrato${data.por_vencer > 1 ? 's' : ''} por vencer
+                            <span class="float-right text-muted text-sm">Revisar</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                    `;
+                        }
+
+                        if (data.vencidos > 0) {
+                            html += `
+                        <a href="{{ route('lqclientes.index') }}?estado=vencido" class="dropdown-item">
+                            <i class="fas fa-times-circle text-danger mr-2"></i>
+                            Hay ${data.vencidos} contrato${data.vencidos > 1 ? 's' : ''} vencido${data.vencidos > 1 ? 's' : ''}
+                            <span class="float-right text-muted text-sm">Revisar</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                    `;
+                        }
+
+                        if (html === '') {
+                            html = `
+                        <a href="#" class="dropdown-item text-muted">
+                            <i class="fas fa-check-circle text-success mr-2"></i>
+                            No hay notificaciones
+                        </a>
+                    `;
+                        }
+
+                        items.innerHTML = html;
+
+                    })
+                    .catch(error => {
+                        console.error('Error al cargar notificaciones:', error);
+                    });
+            }
+
+            cargarNotificaciones();
+
+            setInterval(cargarNotificaciones, 60000);
+
+        });
     </script>
 
-
+    @stack('js')
 
 
 

@@ -23,6 +23,7 @@ use App\Http\Controllers\AbonadoController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClienteCodigoController;
+use App\Http\Controllers\ContratoController;
 use App\Http\Controllers\ControlGaritaController;
 use App\Http\Controllers\DetalleControlGaritaController;
 use App\Http\Controllers\DiaLibreController;
@@ -44,7 +45,9 @@ use App\Http\Controllers\LqAdelantoController;
 use App\Http\Controllers\LqClienteController;
 use App\Http\Controllers\LqDevolucionController;
 use App\Http\Controllers\LqSociedadController;
+use App\Http\Controllers\NotificacionContratoController;
 use App\Http\Controllers\PersonaController;
+use App\Http\Controllers\PesoOtraBalController;
 use App\Http\Controllers\TipoMineralController;
 use App\Http\Controllers\TsBancoController;
 use App\Http\Controllers\TscajaController;
@@ -114,10 +117,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('tsmiscajas', TsMicajaController::class);
     Route::resource('lqclientes', LqClienteController::class);
     Route::resource('lqsociedades', LqSociedadController::class);
-    Route::resource('lqadelantos', controller: LqAdelantoController::class);
-    Route::resource('tscuentasreportesdiarios', controller: TsReporteDiarioCuentasController::class);
-    Route::resource('lqliquidaciones', controller: LqLiquidacionController::class);
-    Route::resource('lqdevoluciones', controller: LqDevolucionController::class);
+    Route::resource('lqadelantos',  LqAdelantoController::class);
+    Route::resource('tscuentasreportesdiarios',  TsReporteDiarioCuentasController::class);
+    Route::resource('lqliquidaciones',  LqLiquidacionController::class);
+    Route::resource('lqdevoluciones',  LqDevolucionController::class);
 
     Route::get('tscuentasreportesdiarios/{id}/filter', [TsReporteDiarioCuentasController::class, 'filter'])->name('tscuentasreportesdiarios.filter');
 
@@ -189,9 +192,6 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/invingresosrapidos/{id}/anular', [InvingresosrapidosController::class, 'anular'])->name('invingresosrapidos.anular');
     Route::get('/inventarioprestamoingreso/{id}/anular', [InventarioprestamoingresoController::class, 'anular'])->name('inventarioprestamoingreso.anular');
 
-    //FOR AJAX
-
-    //FOR SUNAT API
     Route::get('/findPersona', [RanchoController::class, 'get_persona'])->name('findPersona');
     Route::get('/get-selling-price', [InventarioingresoController::class, 'getSellingPrice'])->name('get_selling_price');
 
@@ -283,13 +283,54 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/controlgarita/tipo-vehiculo', [TipoVehiculoController::class, 'index'])->name('controlgarita.tipo-vehiculo.index');
     Route::post('/controlgarita/tipo-vehiculo/guardar', [TipoVehiculoController::class, 'store'])->name('controlgarita.tipo-vehiculo.store');
 
-    //DIAS LIBRES
     Route::get('/diaslibres', [DiaLibreController::class, 'index'])->name('dialibre.index');
     Route::post('/diaslibres/guardar', [DiaLibreController::class, 'store'])->name('dialibre.guardar');
     Route::put('/diaslibres/editar/{id}', [DiaLibreController::class, 'update'])->name('dialibre.editar');
     Route::get('/diaslibres/search', [DiaLibreController::class, 'searchCodigo'])->name('dialibre.search');
-
     Route::get('/salidascuentas/datatable', [TsSalidacuentaController::class, 'datatable'])->name('salidascuentas.datatable');
+
+    //CONTRATOS
+    Route::get('/contratos/{id}', [ContratoController::class, 'index'])->name('contratos.index');
+    Route::put('/contratos/{contrato}', [ContratoController::class, 'update'])->name('contratos.update');
+    Route::post('/contactos', [ContratoController::class, 'guardar_contacto'])
+        ->name('contactos.store');
+    Route::delete('/contactos/{contacto}', [ContratoController::class, 'eliminar_contacto'])
+        ->name('contactos.destroy');
+    Route::post('representantes', [ContratoController::class, 'guardar_representante'])
+        ->name('representantes.store');
+    Route::delete('representantes/{id}', [ContratoController::class, 'eliminar_representante'])
+        ->name('representantes.destroy');
+
+    Route::post('/contratos-empresas', [ContratoController::class, 'guardar_empresa'])
+        ->name('contratos.empresas.store');
+
+    Route::delete('/contratos-empresas/{id}', [ContratoController::class, 'eliminar_empresa'])
+        ->name('contratos.empresas.destroy');
+
+    Route::put('/lqclientes/{id}/activar', [LqClienteController::class, 'activar'])
+        ->name('lqclientes.activar');
+
+    Route::put('/lqclientes/{id}/desactivar', [LqClienteController::class, 'desactivar'])
+        ->name('lqclientes.desactivar');
+    Route::get(
+        '/lqclientes/export/excel',
+        [LqClienteController::class, 'export']
+    )->name('lqclientes.export');
+
+    Route::get('/notificaciones/contratos', [NotificacionContratoController::class, 'index'])
+        ->name('notificaciones.contratos');
+
+    //OTRAS BALANZAS 
+    Route::post('/otras-balanza/export', [PesoOtraBalController::class, 'export'])->name('otrasBalanza.export');
+    Route::get('/otras-balanza', [PesoOtraBalController::class, 'index'])->name('otrasBalanza.index');
+    Route::post('/pesos-otras-balanza', [PesoOtraBalController::class, 'pesos'])->name('otrasBalanza');
+    Route::post('/otras-balanza/guardar', [PesoOtraBalController::class, 'guardar'])->name('otrasBalanza.guardar');
+    Route::post('/otras-balanza/{id}', [PesoOtraBalController::class, 'store'])->name('otrasBalanza.store');
+    Route::post('/otras-balanza/{id}/molienda', [PesoOtraBalController::class, 'guardar_molienda'])->name('otrasBalanza.guardar_molienda');
+    Route::delete('/otras-balanza/{id}', [PesoOtraBalController::class, 'destroy'])->name('otrasBalanza.destroy');
+    Route::put('/otras-balanza/{id}', [PesoOtraBalController::class, 'update'])->name('otrasBalanza.update');
+    Route::get('/otras-balanza/{id}', [PesoOtraBalController::class, 'show'])->name('otrasBalanza.show');
+    Route::get('/lotes/{lote}/pesos-otras', [PesoOtraBalController::class, 'pesosOtrasLote'])->name('otros.pesos');
 });
 
 Route::get('/', function () {

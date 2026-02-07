@@ -300,13 +300,13 @@ return [
             'text' => 'search',
             'topnav_right' => false,
         ],
- 
+
         [
             'type' => 'fullscreen-widget',
             'topnav_right' => true,
         ],
 
-    
+
         [
             'type' => 'sidebar-menu-search',
             'text' => 'search',
@@ -315,7 +315,7 @@ return [
             'text' => 'blog',
             'url' => 'admin/blog',
             'can' => 'manage-blog',
-            
+
         ],
 
         [
@@ -327,40 +327,40 @@ return [
         [
             'text' => 'ALFA',
             'url' => 'https://www.mineraalfagolden.com/home',
-         
+
         ],
         [
             'text' => 'KILATE',
             'url' => 'https://www.kilatecorp.com/home',
-         
+
         ],
 
         [
             'text' => 'INNOVA',
             'url' => 'https://www.innova.innovaminingsys.com/home',
-         
+
         ],
 
 
-        
-    ['header' => 'CHAT'],
-    [
-        'text' => 'CHAT',
-        'icon_color' => 'white',
-        'url' => '/chats',
-        
-    ],  
 
-        
+        ['header' => 'CHAT'],
+        [
+            'text' => 'CHAT',
+            'icon_color' => 'white',
+            'url' => '/chats',
+
+        ],
+
+
 
         ['header' => 'INVENTARIO', 'can' => 'ver producto'],
         [
-            'text' => 'Inventario', 
+            'text' => 'Inventario',
             'icon' => 'fas fa-fw fa-check-square',
-            'icon_color' =>'teal',
+            'icon_color' => 'teal',
             'can' => 'ver producto',
             'submenu' => [
-                
+
                 [
                     'text' => 'Productos',
                     'url' => '/productos',
@@ -394,7 +394,7 @@ return [
                     'url' => '/inventarioingresoapertura',
                     'can' => 'ver producto',
                 ],
-                
+
                 [
                     'text' => 'Proveedores',
                     'url' => '/proveedores',
@@ -416,16 +416,26 @@ return [
                             'url' => '/inventarioprestamosalida',
                             'can' => 'ver producto',
                         ],
-                        
+
                     ],
 
                 ],
 
             ],
         ],
-     
+
+
+        ['header' => 'BALANZA', 'can' => 'ver pesos'],
+
+        [
+            'text' => 'Otras Balanzas',
+            'url' => '/otras-balanza',
+            'can' => 'ver otros pesos',
+
+        ],
+
         ['header' => 'CONFIGURACIÓN DE CUENTAS', 'can' => 'ver producto'],
-    
+
         [
             'text' => 'Usuarios',
             'icon' => 'fas fa-fw fa-users',
@@ -464,7 +474,7 @@ return [
         ],
 
         ['header' => 'EN DESARROLLO', 'can' => 'ver producto'],
-        
+
         [
             'text' => 'Programaciones',
             'icon_color' => 'yellow',
@@ -480,7 +490,7 @@ return [
         ],
 
         ['header' => 'BALANZA', 'can' => 'ver balanza'],
-        
+
         [
             'text' => 'Balanza',
             'icon_color' => 'green',
@@ -490,18 +500,18 @@ return [
         ],
 
 
-        ['header' => 'CLIENTES', 'can' => 'use cuenta'],
+        ['header' => 'CLIENTES', 'can' => 'ver cliente'],
         [
-            'text' => 'CLIENTES', 
+            'text' => 'CLIENTES',
             'icon' => 'fas fa-fw fa-truck-monster',
-            'icon_color' =>'navy',
-            'can' => 'use cuenta',
+            'icon_color' => 'navy',
+            'can' => 'ver cliente',
             'submenu' => [
-                
+
                 [
                     'text' => 'Clientes',
                     'url' => '/lqclientes',
-                    'can' => 'use cuenta',
+                    'can' => 'ver cliente',
                 ],
 
                 [
@@ -510,9 +520,9 @@ return [
                     'can' => 'use cuenta',
                 ],
 
-                
 
-                
+
+
 
             ],
         ],
@@ -523,14 +533,14 @@ return [
             'icon_color' => 'green',
             'url' => '/tsbancos',
             'can' => 'use cuenta'
-        ],  
+        ],
 
         [
             'text' => 'Motivos movimientos',
             'icon_color' => 'yellow',
             'url' => '/tsmotivos',
             'can' => 'use cuenta'
-        ],  
+        ],
 
         [
             'text' => 'Tipos Comprobantes',
@@ -538,18 +548,18 @@ return [
             'url' => '/tiposcomprobantes',
             'can' => 'use cuenta'
         ],
-        
+
 
         [
 
 
-            
-            'text' => 'CAJAS', 
+
+            'text' => 'CAJAS',
             'icon' => 'fas fa-fw  fa-th-large',
-            'icon_color' =>'orange',
+            'icon_color' => 'orange',
             'can' => 'use cuenta',
             'submenu' => [
-                
+
                 [
                     'text' => 'Cajas',
                     'url' => '/tscajas',
@@ -567,23 +577,23 @@ return [
                     'url' => '/tssalidascajas',
                     'can' => 'use cuenta',
                 ],
-                
 
 
-               
+
+
             ],
         ],
 
 
         [
-            
-            'text' => 'CUENTAS', 
+
+            'text' => 'CUENTAS',
             'icon' => 'fas fa-fw   fa-credit-card',
-            'icon_color' =>'light   ',
+            'icon_color' => 'light   ',
             'can' => 'use cuenta',
             'font-size' => '10px',
             'submenu' => [
-                
+
                 [
                     'text' => 'Cuentas',
                     'url' => '/tscuentas',
@@ -627,16 +637,16 @@ return [
             ],
         ],
 
-        
+
 
         ['header' => 'ESTRUCTURA ORGANIZACIONAL', 'can' => 'edit cuenta'],
         [
-            'text' => 'ORGANIZACIÓN', 
+            'text' => 'ORGANIZACIÓN',
             'icon' => 'fas fa-fw fa-sitemap',
-            'icon_color' =>'lime',
+            'icon_color' => 'lime',
             'can' => 'edit cuenta',
             'submenu' => [
-                
+
                 [
                     'text' => 'Áreas',
                     'url' => '/areas',
@@ -656,7 +666,7 @@ return [
                 ],
 
 
-                
+
 
             ],
         ],
@@ -670,33 +680,35 @@ return [
             'icon_color' => 'green',
             'url' => '/tsmiscajas',
             'can' => 'use caja',
-        ],  
+        ],
 
 
-        ['header' => 'DEPARTAMENTO LEGAL',
-        // 'can' => 'view doclegal',
+        [
+            'header' => 'DEPARTAMENTO LEGAL',
+            // 'can' => 'view doclegal',
         ],
         [
             'text' => 'DOCUMENTACIÓN LEGAL',
             'icon_color' => 'red',
             'url' => '/codigos-clientes',
-        //    'can' => 'view doclegal',
+            //    'can' => 'view doclegal',
         ],
 
-        ['header' => 'GARITA DE CONTROL',
-        // 'can' => 'view garita',
+        [
+            'header' => 'GARITA DE CONTROL',
+            // 'can' => 'view garita',
         ],
         [
             'text' => 'CONTROL DE MOVIMIENTOS',
             'icon_color' => 'blue',
             'url' => '/controlgarita',
-        //    'can' => 'view garita',
+            //    'can' => 'view garita',
         ],
         [
             'text' => 'REGISTRO DE DÍAS LIBRES',
             'icon_color' => 'green',
             'url' => '/diaslibres',
-        //    'can' => 'view garita',
+            //    'can' => 'view garita',
         ],
 
 

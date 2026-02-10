@@ -331,6 +331,13 @@ Route::group(['middleware' => ['auth']], function () {
     Route::put('/otras-balanza/{id}', [PesoOtraBalController::class, 'update'])->name('otrasBalanza.update');
     Route::get('/otras-balanza/{id}', [PesoOtraBalController::class, 'show'])->name('otrasBalanza.show');
     Route::get('/lotes/{lote}/pesos-otras', [PesoOtraBalController::class, 'pesosOtrasLote'])->name('otros.pesos');
+    
+    //REINFO
+    Route::get('/lqclientes/reinfo/get/{id}', [LqClienteController::class, 'getReinfo'])->name('lqclientes.reinfo.get');
+    Route::post('/lqclientes/reinfo/save', [LqClienteController::class, 'saveReinfo'])->name('lqclientes.reinfo.save');
+    Route::get('/lqclientes/reinfo/departamentos', [LqClienteController::class, 'getDepartamentos'])->name('lqclientes.reinfo.departamento');
+    Route::get('/lqclientes/reinfo/provincias/{dpto_id}', [LqClienteController::class, 'getProvincias'])->name('lqclientes.reinfo.provincia');
+    Route::get('/lqclientes/reinfo/distritos/{prov_id}', [LqClienteController::class, 'getDistritos'])->name('lqclientes.reinfo.distrito');
 });
 
 Route::get('/', function () {

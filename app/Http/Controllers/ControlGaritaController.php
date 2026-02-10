@@ -18,6 +18,8 @@ class ControlGaritaController extends Controller
         $this->middleware('auth');
         $this->middleware('permission:start cg-turn', ['only' => ['store']]);
         $this->middleware('permission:end cg-turn', ['only' => ['endTurn']]);
+        // $this->middleware('auth');
+        // $this->middleware('permission:gestionar turnos garita', ['only' => ['store', 'endTurn']]);
     }
 
     /**

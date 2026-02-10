@@ -50,23 +50,26 @@
                 {{ strtoupper($cliente->observacion) }}
             </td>
             @can('gestionar clientes')
-                <td>
-                    @if ($cliente->estado == 'A')
-                        <a href="{{ route('contratos.index', $cliente->id) }}" class="btn btn-sm btn-info">
-                            <i class="fa fa-file-text"></i>
-                        </a>
-                        <button class="btn btn-sm btn-warning btn-edit" data-id="{{ $cliente->id }}">
-                            <i class="fa fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger btn-desactivar" data-id="{{ $cliente->id }}">
-                            <i class="fa fa-eye-slash"></i>
-                        </button>
-                    @else
-                        <button class="btn btn-sm btn-success btn-activar" data-id="{{ $cliente->id }}">
-                            <i class="fa fa-eye"></i>
-                    @endif
-                @endcan
-
+            <td>
+                @if ($cliente->estado == 'A')
+                    <a href="{{ route('contratos.index', $cliente->id) }}" class="btn btn-sm btn-info">
+                        <i class="fa fa-file-text"></i>
+                    </a>
+                    <button class="btn btn-sm btn-warning btn-edit" data-id="{{ $cliente->id }}">
+                        <i class="fa fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-desactivar" data-id="{{ $cliente->id   }}">
+                        <i class="fa fa-eye-slash"></i>
+                    </button>
+                @else
+                    <button class="btn btn-sm btn-success btn-activar" data-id="{{ $cliente->id }}">
+                        <i class="fa fa-eye"></i>
+                    </button>
+                @endif
+                    <button type="button" class="btn btn-sm btn-success btn-reinfo" data-id="{{ $cliente->id }}" title="Gestionar REINFO">
+                        <i class="fa fa-map-marker"></i>
+                    </button>
+            @endcan
             </td>
         </tr>
     @endforeach

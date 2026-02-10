@@ -22,6 +22,9 @@ class DetalleControlGaritaController extends Controller
         $this->middleware('auth');
         $this->middleware('permission:create cg-register', ['only' => ['store']]);
         $this->middleware('permission:edit cg-register', ['only' => ['update']]);
+        // $this->middleware('auth');
+        // $this->middleware('permission:crear registro garita', ['only' => ['store']]);
+        // $this->middleware('permission:editar registro garita', ['only' => ['update']]);
     }
 
     /**

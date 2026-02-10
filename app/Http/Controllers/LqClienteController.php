@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\ClientesExport;
 use App\Models\LqCliente;
+use App\Models\Ubigeo;
 use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -296,5 +297,109 @@ class LqClienteController extends Controller
         } else {
             return response()->json(['success' => false, 'message' => 'Lote no encontrado']);
         }
+    }
+    
+    /**
+     * DATOS REINFO
+     */
+    public function getReinfo($id)
+    {
+        $cliente = LqCliente::with('ubigeo.parent.parent')->find($id);
+
+        if (!$cliente) {
+            return response()->json(['success' => false, 'message' => 'Cliente no encontrado'], 404);
+        }
+
+        $data = [
+            'id'            => $cliente->id,
+            'codigo_minero' => $cliente->codigo_minero,
+            'nombre_minero' => $cliente->nombre_minero,
+            'estado_reinfo' => $cliente->estado_reinfo,
+            'ubigeo_id'     => $cliente->ubigeo_id,
+        ];
+
+        if ($cliente->ubigeo) {
+            $data['distrito_id']     = $cliente->ubigeo->id;
+            $data['provincia_id']    = $cliente->ubigeo->parent_id;
+            $data['departamento_id'] = $cliente->ubigeo->parent->parent_id ?? null;
+            $data['ubicacion_texto'] = $cliente->ubigeo->parent->parent->nombre . ' / ' . 
+                                       $cliente->ubigeo->parent->nombre . ' / ' . 
+                                       $cliente->ubigeo->nombre;
+        } else {
+            $data['distrito_id']     = null;
+            $data['provincia_id']    = null;
+            $data['departamento_id'] = null;
+        }
+
+        return response()->json([
+            'success' => true,
+            'data'    => $data
+        ]);
+    }
+
+    public function saveReinfo(Request $request)
+    {
+        try {
+            $request->validate([
+                'cliente_id'    => 'required|exists:lq_clientes,id',
+                'codigo_minero' => [
+                    'nullable', 
+                    'string', 
+                    'max:255', 
+                    Rule::unique('lq_clientes', 'codigo_minero')->ignore($request->cliente_id)
+                ],
+                'nombre_minero' => 'nullable|string|max:255',
+                'ubigeo_id'     => 'nullable|exists:ubigeo,id',
+                'estado_reinfo' => 'nullable|boolean',
+            ]);
+
+            $cliente = LqCliente::findOrFail($request->cliente_id);
+
+            $cliente->update([
+                'codigo_minero' => $request->codigo_minero,
+                'nombre_minero' => $request->nombre_minero,
+                'ubigeo_id'     => $request->ubigeo_id,
+                'estado_reinfo' => $request->estado_reinfo,
+            ]);
+
+            // return response()->json([
+            //     'success' => true,
+            //     'message' => 'Información REINFO actualizada correctamente.',
+            //     'ubicacion_nombre' => $cliente->ubigeo ? $cliente->ubigeo->nombre : '-'
+            // ]);
+
+            return redirect()
+                ->route('lqclientes.index')
+                ->with('status', 'Información REINFO actualizada correctamente.');
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error al guardar: ' . $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getDepartamentos()
+    {
+        $departamentos = Ubigeo::where('nivel', 1)->orderBy('nombre')->get(['id', 'nombre']);
+        return response()->json($departamentos);
+    }
+
+    public function getProvincias($departamento_id)
+    {
+        $provincias = Ubigeo::where('parent_id', $departamento_id)
+                            ->where('nivel', 2)
+                            ->orderBy('nombre')
+                            ->get(['id', 'nombre']);
+        return response()->json($provincias);
+    }
+
+    public function getDistritos($provincia_id)
+    {
+        $distritos = Ubigeo::where('parent_id', $provincia_id)
+                           ->where('nivel', 3)
+                           ->orderBy('nombre')
+                           ->get(['id', 'nombre']);
+        return response()->json($distritos);
     }
 }

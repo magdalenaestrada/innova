@@ -104,6 +104,7 @@
 
     @include('liquidaciones.clientes.modal.create')
     @include('liquidaciones.clientes.modal.edit')
+    @include('liquidaciones.clientes.modal.reinfo')
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
@@ -251,13 +252,10 @@
             $(document).on('click', '.btn-edit', function() {
                 let id = $(this).data('id');
 
-                console.log('Botón clickeado, ID:', id);
-
                 $.ajax({
                     url: '/lqclientes/' + id + '/edit',
                     type: 'GET',
                     success: function(data) {
-                        console.log('Datos recibidos:', data);
 
                         $('#edit_id').val(data.id);
                         $('#edit_codigo').val(data.codigo);
@@ -281,8 +279,6 @@
                         }
 
                         $('#formEditCliente').attr('action', '/lqclientes/' + data.id);
-
-                        console.log('Intentando abrir modal...');
 
                         var modalElement = document.getElementById('ModalEdit');
                         var modal = new bootstrap.Modal(modalElement);
@@ -435,8 +431,154 @@
             });
         </script>
 
+        <script>
+            $(document).ready(function() {
+                const modalReinfo = $('#ModalReinfo');
+                const selectDpto = $('#select_departamento');
+                const selectProv = $('#select_provincia');
+                const selectDist = $('#select_distrito');
 
+                function cargarDepartamentos() {
+                    $.get('{{ route("lqclientes.reinfo.departamento") }}', function(data) {
+                        let html = '<option value="">Seleccione Departamento...</option>';
+                        data.forEach(d => {
+                            html += `<option value="${d.id}">${d.nombre}</option>`;
+                        });
+                        selectDpto.html(html);
+                    });
+                }
+                cargarDepartamentos();
 
+                function cargarProvincias(dptoId) {
+                    return $.get('/lqclientes/reinfo/provincias/' + dptoId, function(data) {
+                        let html = '<option value="">Seleccione Provincia...</option>';
+                        data.forEach(p => html += `<option value="${p.id}">${p.nombre}</option>`);
+                        selectProv.html(html).prop('disabled', false);
+                    });
+                };
+
+                function cargarDistritos(provId) {
+                    return $.get('/lqclientes/reinfo/distritos/' + provId, function(data) {
+                        let html = '<option value="">Seleccione Distrito...</option>';
+                        data.forEach(d => html += `<option value="${d.id}">${d.nombre}</option>`);
+                        selectDist.html(html).prop('disabled', false);
+                    });
+                }
+
+                selectDpto.on('change', function() {
+                    let dptoId = $(this).val();
+                    selectProv.html('<option value="">Cargando...</option>').prop('disabled', true);
+                    selectDist.html('<option value="">Seleccione Prov...</option>').prop('disabled', true);
+
+                    if (dptoId) {
+                        cargarProvincias(dptoId);
+                    } else {
+                        selectProv.html('<option value="">Seleccione Dpto...</option>').prop('disabled', true);
+                    }
+                });
+
+                selectProv.on('change', function() {
+                    let provId = $(this).val();
+                    selectDist.html('<option value="">Cargando...</option>').prop('disabled', true);
+
+                    if (provId) {
+                        cargarDistritos(provId);
+                    } else {
+                        selectDist.html('<option value="">Seleccione Prov...</option>').prop('disabled', true);;
+                    }
+                });
+
+                $(document).on('click', '.btn-reinfo', async function() {
+                    let id = $(this).data('id');
+                    let btn = $(this);
+                    
+                    let originalText = btn.html();
+                    btn.prop('disabled', true);
+                    // btn.html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
+
+                    $('#formReinfo')[0].reset();
+                    $('#reinfo_cliente_id').val(id);
+                    $('#ubicacion_actual_texto').hide();
+                    
+                    selectProv.html('<option value="">Seleccione Dpto...</option>').prop('disabled', true);
+                    selectDist.html('<option value="">Seleccione Prov...</option>').prop('disabled', true);
+                    
+                    try {
+                        const response = await $.get(`/lqclientes/reinfo/get/${id}`);
+
+                        var modalElement = document.getElementById('ModalReinfo');
+                        var myModal = new bootstrap.Modal(modalElement);
+                        
+                        if(response.success) {
+                            let d = response.data;
+
+                            $('#reinfo_codigo').val(d.codigo_minero);
+                            $('#reinfo_nombre').val(d.nombre_minero);
+                            $('#reinfo_estado').val(d.estado_reinfo !== null ? d.estado_reinfo : '1');
+
+                            if (d.ubigeo_id && d.departamento_id) {
+                                selectDpto.val(d.departamento_id);
+
+                                await cargarProvincias(d.departamento_id);
+                                selectProv.val(d.provincia_id);
+
+                                await cargarDistritos(d.provincia_id);
+                                selectDist.val(d.ubigeo_id);
+                                
+                                $('#ubicacion_actual_texto').html(
+                                    '<i class="fa fa-check-circle text-success"></i> Actual: <strong>' + d.ubicacion_texto + '</strong>'
+                                ).show();
+                            } else {
+                                selectDpto.val('');
+                                selectProv.html('<option value="">Seleccione Dpto...</option>').prop('disabled', true);
+                                selectDist.html('<option value="">Seleccione Prov...</option>').prop('disabled', true);
+                            }
+                            myModal.show();
+                        }                        
+                    } catch (error) {
+                        Swal.fire('Error', 'No se pudo sincronizar los datos', 'error');
+                    } finally {
+                        btn.html(originalText).prop('disabled', false);
+                    }
+                });
+
+                // --- GUARDAR DATOS (AJAX) ---
+                // $('#formReinfo').on('submit', function(e) {
+                //     e.preventDefault();
+                    
+                //     let form = $(this);
+                //     let btn = $('#btnGuardarReinfo');
+                    
+                //     btn.html('<i class="fa fa-spinner fa-spin"></i> Guardando...').prop('disabled', true);
+
+                //     $.ajax({
+                //         url: "{{ route('lqclientes.reinfo.save') }}",
+                //         type: 'POST',
+                //         data: form.serialize(),
+                //         success: function(response) {
+                //             if(response.success) {
+                //                 var modalElement = document.getElementById('ModalReinfo');
+                //                 var modalInstance = bootstrap.Modal.getInstance(modalElement);
+                //                 modalInstance.hide();
+                //                 Swal.fire('Éxito', response.message, 'success'); // TYPE: Success (Legacy style)
+                //                 // Opcional: Recargar tabla si es necesario
+                //                 // filtrarClientes();   
+                //             }
+                //         },
+                //         error: function(xhr) {
+                //             let msg = 'Error al guardar.';
+                //             if(xhr.responseJSON && xhr.responseJSON.message) {
+                //                 msg = xhr.responseJSON.message;
+                //             }
+                //             Swal.fire('Error', msg, 'error'); // TYPE: Error (Legacy style)
+                //         },
+                //         complete: function() {
+                //             btn.html('<i class="fa fa-save"></i> Guardar Cambios').prop('disabled', false);
+                //         }
+                //     });
+                // });
+            });
+        </script>
 
         @if ($errors->any())
             <script>

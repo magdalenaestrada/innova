@@ -13,6 +13,8 @@ class EtiquetaController extends Controller
     {
         $this->middleware('auth');
         $this->middleware('permission:create cg-etiqueta', ['only' => ['store']]);
+        // $this->middleware('auth');
+        // $this->middleware('permission:gestionar etiquetas garita', ['only' => ['store']]);
     }
 
     /**

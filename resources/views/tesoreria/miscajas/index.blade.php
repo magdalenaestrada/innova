@@ -447,7 +447,11 @@
 
 
 
-                                    <div class="card__type">S/. {{ number_format($new_bal, 2) }}</div>
+                                    @php
+                                        $simbolo = ($caja->tipo_moneda_id == 1) ? '$' : 'S/.';
+                                    @endphp
+
+                                    <div class="card__type">{{ $simbolo }} {{ number_format($new_bal, 2) }}</div>
                                     <div class="card__number">
                                         <span class="card__digit-group">0000</span>
                                         <span class="card__digit-group">0000</span>

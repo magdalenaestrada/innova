@@ -181,14 +181,18 @@
                                                 {{ $reposicioncaja->descripcion }}
                                             </td>
 
+                                            {{-- ✅ MONTO CON MONEDA SEGÚN LA CUENTA --}}
                                             <td scope="row">
+                                                @php
+                                                    $monedaNombre = optional(optional($reposicioncaja->salidacuenta)->cuenta->tipomoneda)->nombre;
+                                                    $simbolo = ($monedaNombre === 'DOLARES') ? '$' : 'S/.';
+                                                    // usa el monto real del egreso (salidacuenta) si existe
+                                                    $montoReal = optional($reposicioncaja->salidacuenta)->monto ?? $reposicioncaja->monto;
+                                                @endphp
 
                                                 <div class="d-flex justify-content-between">
-                                                    <p> S/. </p>
-
-                                                    <p> -{{ number_format($reposicioncaja->monto, 2) }}</p>
-
-
+                                                    <p>{{ $simbolo }}</p>
+                                                    <p>-{{ number_format($montoReal, 2) }}</p>
                                                 </div>
                                             </td>
 
@@ -282,7 +286,6 @@
 
                                                 <div class="ml-1">
                                                     <a href="{{ route('tsotrascajas.export-excel', $reposicioncaja->id) }}" class="btn btn-sm btn-success">Exportar</a>
-
                                                 </div>
                                             </td>
 
@@ -350,8 +353,6 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-            //alert();
-
             //Search product
             $('#searcht').on('input', function(e) {
                 e.preventDefault();
@@ -363,7 +364,6 @@
                         search_string: search_string
                     },
                     success: function(response) {
-
                         $('#reposicionescajas-table tbody').html(response);
                     },
                     error: function(xhr, status, error) {

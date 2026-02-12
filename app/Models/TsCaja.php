@@ -11,7 +11,7 @@ class TsCaja extends Model
 
     protected $table = 'ts_cajas';
 
-    protected $fillable = ['nombre', 'codigo', 'encargado_id', 'creador_id', 'balance'];
+    protected $fillable = ['nombre', 'codigo', 'tipo_moneda_id', 'encargado_id', 'creador_id', 'balance'];
 
     public function encargados()
     {
@@ -37,5 +37,13 @@ class TsCaja extends Model
     {
         return $this->hasMany(TsReposicioncaja::class, 'caja_id');
     }
-
+    public function tipoMoneda()
+    {
+        return $this->belongsTo(\App\Models\TipoMoneda::class, 'tipo_moneda_id');
+    }
+    public function getSimboloMonedaAttribute()
+    {
+        $codigo = strtoupper($this->tipoMoneda->codigo ?? 'PEN'); // PEN / USD
+        return $codigo === 'USD' ? '$' : 'S/.';
+    }
 }

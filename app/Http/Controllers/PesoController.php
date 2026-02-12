@@ -3,96 +3,49 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use App\Models\Peso;
-
+use App\Models\PesoKilate; // <- crea/importa este modelo
 use App\Exports\PesoExport;
 use Excel;
 
 class PesoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-
-
-     public function __construct()
-    { 
-        $this->middleware('permission:ver balanza', ['only' => ['export_excel']]);
-        $this->middleware('permission:ver balanza', ['only' => ['index']]);
-      
-    }
-
-
-    public function index()
+    public function __construct()
     {
-        $pesos = Peso::orderBy('NroSalida','desc')->paginate(200);
-        return view('pesos.index', compact('pesos'));
+        $this->middleware('permission:ver balanza', ['only' => ['export_excel', 'index']]);
     }
 
-    /** 
-     * Show the form for creating a new resource.
-     */
-    public function create()
+ public function index(Request $request)
+{
+    $balanza = $request->get('balanza'); // pesos | kilate | null
+
+    $pesos = collect();
+    $pesos_kilate = collect();
+
+    if ($balanza === 'pesos' || $balanza === null) {
+        $pesos = Peso::orderBy('NroSalida','desc')->paginate(200, ['*'], 'pesos_page');
+    }
+
+    if ($balanza === 'kilate' || $balanza === null) {
+        $pesos_kilate = PesoKilate::orderBy('NroSalida','desc')->paginate(200, ['*'], 'kilate_page');
+    }
+
+    // ... (tus pluck distinct para el modal y KPIs)
+}
+
+    public function export_excel(Request $request)
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
-    
-
-
-    public function export_excel(Request $request){
-
+        $balanza     = $request->input('balanza'); // pesos | kilate
         $observacion = $request->input('Observacion');
-        $producto = $request->input('Producto');
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
+        $producto    = $request->input('Producto');
+        $startDate   = $request->input('start_date');
+        $endDate     = $request->input('end_date');
 
+        $filename = $balanza === 'kilate' ? 'pesos_kilate.xlsx' : 'pesos.xlsx';
 
-
-        return Excel::download(new PesoExport($observacion, $producto, $startDate, $endDate), 'pesos.xlsx');
+        return Excel::download(
+            new PesoExport($balanza, $observacion, $producto, $startDate, $endDate),
+            $filename
+        );
     }
-
-
-
 }

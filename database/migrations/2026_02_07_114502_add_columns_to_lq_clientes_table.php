@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('lq_clientes', function (Blueprint $table) {
-            $table->string('codigo_minero')->unique()->nullable()->after('nombre_r_info');
+            $table->string('codigo_minero')->nullable()->after('nombre_r_info');
             $table->string('nombre_minero')->nullable()->after('codigo_minero');
             $table->unsignedBigInteger('ubigeo_id')->nullable()->after('nombre_minero');
             $table->boolean('estado_reinfo')->nullable()->after('ubigeo_id');

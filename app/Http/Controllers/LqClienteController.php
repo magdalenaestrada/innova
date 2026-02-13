@@ -331,12 +331,7 @@ class LqClienteController extends Controller
         try {
             $request->validate([
                 'cliente_id'    => 'required|exists:lq_clientes,id',
-                'codigo_minero' => [
-                    'nullable', 
-                    'string', 
-                    'max:255', 
-                    Rule::unique('lq_clientes', 'codigo_minero')->ignore($request->cliente_id)
-                ],
+                'codigo_minero' => 'nullable|string|max:255',
                 'nombre_minero' => 'nullable|string|max:255',
                 'ubigeo_id'     => 'nullable|exists:ubigeo,id',
                 'estado_reinfo' => 'nullable|boolean',

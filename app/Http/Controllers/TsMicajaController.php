@@ -65,11 +65,6 @@ class TsMicajaController extends Controller
 
     public function indexsalidas()
     {
-
-
-
-
-
         $empleado = Auth::user()->empleado;
         $cajaIds = TsCaja::whereHas('encargados', function ($query) use ($empleado) {
             $query->where('encargado_id', $empleado->id);

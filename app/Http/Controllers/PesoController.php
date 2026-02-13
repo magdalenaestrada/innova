@@ -2,50 +2,173 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Exports\PesosExport;
 use App\Models\Peso;
-use App\Models\PesoKilate; // <- crea/importa este modelo
-use App\Exports\PesoExport;
-use Excel;
+use Illuminate\Http\Request;
+use App\Models\RecepcionIngreso;
+use Carbon\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Models\User;
 
 class PesoController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:ver balanza', ['only' => ['export_excel', 'index']]);
+        $this->middleware('permission:ver pesos');
+
     }
 
- public function index(Request $request)
-{
-    $balanza = $request->get('balanza'); // pesos | kilate | null
-
-    $pesos = collect();
-    $pesos_kilate = collect();
-
-    if ($balanza === 'pesos' || $balanza === null) {
-        $pesos = Peso::orderBy('NroSalida','desc')->paginate(200, ['*'], 'pesos_page');
-    }
-
-    if ($balanza === 'kilate' || $balanza === null) {
-        $pesos_kilate = PesoKilate::orderBy('NroSalida','desc')->paginate(200, ['*'], 'kilate_page');
-    }
-
-    // ... (tus pluck distinct para el modal y KPIs)
-}
-
-    public function export_excel(Request $request)
+    public function recepcionar(string $nro_salida)
     {
-        $balanza     = $request->input('balanza'); // pesos | kilate
-        $observacion = $request->input('Observacion');
-        $producto    = $request->input('Producto');
-        $startDate   = $request->input('start_date');
-        $endDate     = $request->input('end_date');
+        $peso = Peso::where('NroSalida', $nro_salida)->firstOrFail();
 
-        $filename = $balanza === 'kilate' ? 'pesos_kilate.xlsx' : 'pesos.xlsx';
+        $prefill = [
+            'nro_salida'      => $peso->NroSalida,
+            'dni_conductor'   => $peso->DNIConductor ?? null,
+            'datos_conductor' => $peso->Conductor ?? null,
+        ];
 
+        $pesoInfo = [
+            'fechas'        => $peso->Fechas ?? null,
+            'horas'         => $peso->Horas ?? null,
+            'bruto'         => $peso->Bruto ?? null,
+            'tara'          => $peso->Tara ?? null,
+            'neto'          => $peso->Neto ?? null,
+            'producto'      => $peso->Producto ?? null,
+            'placa'         => $peso->Placa ?? null,
+            'carreta'       => $peso->Carreta ?? null,
+            'destino'       => $peso->destino ?? null,
+            'origen'        => $peso->origen ?? null,
+            'guia'          => $peso->guia ?? null,
+            'guiat'         => $peso->guiat ?? null,
+            'razon_social'  => $peso->RazonSocial ?? null,
+            'conductor'     => $peso->Conductor ?? null,
+        ];
+
+        // ✅ REPRESENTANTES PARA EL SELECT
+        $REP_IDS = [23, 24, 32, 34, 38];
+
+        $representantes = User::query()
+            ->whereIn('id', $REP_IDS)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return view('recepciones_ingreso.create', compact('prefill', 'pesoInfo', 'representantes'));
+    }
+
+    public function index(Request $request)
+    {
+        $pesos = Peso::query();
+
+        if ($request->filled('fechai') && $request->filled('fechas')) {
+            $pesos->whereBetween('Fechas', [
+                Carbon::parse($request->fechai)->startOfDay(),
+                Carbon::parse($request->fechas)->endOfDay(),
+            ]);
+        } elseif ($request->filled('fechai')) {
+            $pesos->where('Fechas', '>=', Carbon::parse($request->fechai)->startOfDay());
+        } elseif ($request->filled('fechas')) {
+            $pesos->where('Fechas', '<=', Carbon::parse($request->fechas)->endOfDay());
+        }
+
+
+        if ($request->filled('ticket')) {
+            $pesos->where('NroSalida', 'like', $request->ticket . '%');
+        }
+
+        if ($request->filled('razon')) {
+            $pesos->where('RazonSocial', 'like',  $request->razon . '%');
+        }
+
+        if ($request->filled('producto')) {
+            $pesos->where('Producto', 'like', '%' . $request->producto . '%');
+        }
+
+        if ($request->filled('destino')) {
+            $pesos->where('destino', 'like',  $request->destino . '%');
+        }
+
+        if ($request->filled('origen')) {
+            $pesos->where('origen', 'like', $request->origen . '%');
+        }
+
+        $pesos = $pesos->orderBy('NroSalida', 'desc')->simplePaginate(200);
+
+        $nros = collect($pesos->items())
+            ->pluck('NroSalida')
+            ->filter()   // quita null/vacíos
+            ->values()
+            ->all();
+
+        $recepcionesPorSalida = $nros
+            ? RecepcionIngreso::whereIn('nro_salida', $nros)->pluck('id', 'nro_salida')->toArray()
+            : [];
+
+        if ($request->ajax()) {
+            return view('pesos.partials.tabla', compact('pesos', 'recepcionesPorSalida'))->render();
+        }
+
+        return view('pesos.index', compact('pesos', 'recepcionesPorSalida'));
+    }
+
+
+
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        $peso = Peso::where('nrosalida', $id)->firstOrFail();
+
+        return view('pesos.show', compact('peso'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+    }
+
+    public function exportExcel(Request $request)
+    {
         return Excel::download(
-            new PesoExport($balanza, $observacion, $producto, $startDate, $endDate),
-            $filename
+            new PesosExport($request),
+            'pesos_' . now()->format('Ymd_His') . '.xlsx'
         );
     }
 }

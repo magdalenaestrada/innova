@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('humedades', function (Blueprint $table) {
+            $table->id();
+            $table->date("fecha_recepcion")->index();
+            $table->date("fecha_emision")->index();
+            $table->date("periodo_inicio")->index();
+            $table->date("periodo_fin")->index();
+            $table->decimal("humedad", 5, 2);
+            $table->string("observacion")->nullable();
+            $table->foreignId("ingreso_id")->constrained("ingresos_liquidaciones");
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('humedades');
+    }
+};

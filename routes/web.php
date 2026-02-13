@@ -41,6 +41,7 @@ use App\Http\Controllers\PesoController;
 use App\Http\Controllers\PosicionController;
 use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\EtiquetaController;
+use App\Http\Controllers\LoteController;
 use App\Http\Controllers\LqAdelantoController;
 use App\Http\Controllers\LqClienteController;
 use App\Http\Controllers\LqDevolucionController;
@@ -185,7 +186,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('export-excel-reportescuentas', [TsReporteDiarioCuentasController::class, 'export_excel'])->name('tsreportescuentas.export-excel');
     Route::get('export-contable-excel-reportescuentas', [TsReporteDiarioCuentasController::class, 'export_excel_contable'])->name('tsreporteContablecuentas.export-excel');
     Route::post('export-excel-custom-detallecontrolgarita', [DetalleControlGaritaController::class, 'exportExcelCustom'])->name('detcontrolgarita.export-excel-custom');
-
+    Route::get('/pesos/export/excel', [PesoController::class, 'exportExcel'])
+        ->name('pesos.export.excel');
     //ANULAR ROUTES
     Route::get('/inventarioingresos/{id}/anular', [InventarioingresoController::class, 'anular'])->name('inventarioingresos.anular');
     Route::get('/invsalidasrapidas/{id}/anular', [InvsalidasrapidasController::class, 'anular'])->name('invsalidasrapidas.anular');
@@ -331,13 +333,24 @@ Route::group(['middleware' => ['auth']], function () {
     Route::put('/otras-balanza/{id}', [PesoOtraBalController::class, 'update'])->name('otrasBalanza.update');
     Route::get('/otras-balanza/{id}', [PesoOtraBalController::class, 'show'])->name('otrasBalanza.show');
     Route::get('/lotes/{lote}/pesos-otras', [PesoOtraBalController::class, 'pesosOtrasLote'])->name('otros.pesos');
-    
+
     //REINFO
     Route::get('/lqclientes/reinfo/get/{id}', [LqClienteController::class, 'getReinfo'])->name('lqclientes.reinfo.get');
     Route::post('/lqclientes/reinfo/save', [LqClienteController::class, 'saveReinfo'])->name('lqclientes.reinfo.save');
     Route::get('/lqclientes/reinfo/departamentos', [LqClienteController::class, 'getDepartamentos'])->name('lqclientes.reinfo.departamento');
     Route::get('/lqclientes/reinfo/provincias/{dpto_id}', [LqClienteController::class, 'getProvincias'])->name('lqclientes.reinfo.provincia');
     Route::get('/lqclientes/reinfo/distritos/{prov_id}', [LqClienteController::class, 'getDistritos'])->name('lqclientes.reinfo.distrito');
+
+
+    Route::post('/lotes', [LoteController::class, 'store'])->name('lotes.store');
+    Route::get('/lotes', [LoteController::class, 'index'])->name('lotes');
+    Route::get('findLote', [LoteController::class, 'findLote'])->name('findLote');
+    Route::get('/lotes/{lote}/edit', [LoteController::class, 'edit'])->name('lotes.edit');
+    Route::put('/lotes/{id}', [LoteController::class, 'update'])->name('lotes.update');
+    Route::delete('/lotes/destroy', [LoteController::class, 'destroy'])->name('lotes.destroy');
+    Route::get('/lotes/search', [LoteController::class, 'search'])->name('lotes.search');
+    Route::get('/lotes/{id}/pesos', [LoteController::class, 'pesosEnCancha'])->name('lotes.pesos');
+    Route::get('/lotes/{lote}/pesos-otras', [PesoOtraBalController::class, 'pesosOtrasLote'])->name('otros.pesos');
 });
 
 Route::get('/', function () {

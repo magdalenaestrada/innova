@@ -4,12 +4,7 @@
             <td scope="row">
                 {{ \Carbon\Carbon::parse($salidacaja->created_at)->format('d/m/Y H:i') }}
             </td>
-          
-
-
-
-
-
+            
             <td scope="row">
                 @if ($salidacaja->caja)
                     {{ $salidacaja->caja->nombre }}

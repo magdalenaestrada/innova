@@ -223,29 +223,18 @@ class LqClienteController extends Controller
             ]
         );
 
-        if ($request->r_info_prestado == true) {
-            $cliente->update([
-                'documento' => $request->documento,
-                'nombre' => $request->nombre,
-                'creador_id' => auth()->id(),
-                'nombre_r_info' => $request->nombre_r_info,
-                'r_info_prestado' => $request->r_info_prestado,
-                'r_info' => $request->r_info,
-                'observacion' => $request->observacion,
-                'codigo' => $request->codigo,
-            ]);
-        } else {
-            $cliente->update([
-                'documento' => $request->documento,
-                'nombre' => $request->nombre,
-                'creador_id' => auth()->id(),
-                'nombre_r_info' => $request->nombre,
-                'r_info_prestado' => $request->r_info_prestado,
-                'r_info' => $request->documento,
-                'observacion' => $request->observacion,
-                'codigo' => $request->codigo,
-            ]);
-        }
+        $r_info_prestado = $request->has('r_info_prestado') && $request->r_info_prestado ? true : false;
+
+        $cliente->update([
+            'documento' => $request->documento,
+            'nombre' => $request->nombre,
+            'creador_id' => auth()->id(),
+            'nombre_r_info' => $r_info_prestado ? $request->nombre_r_info : $request->nombre,
+            'r_info_prestado' => $r_info_prestado,
+            'r_info' => $r_info_prestado ? $request->r_info : $request->documento,
+            'observacion' => $request->observacion,
+            'codigo' => $request->codigo,
+        ]);
 
         return redirect()
             ->route('lqclientes.index')

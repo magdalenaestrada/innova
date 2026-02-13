@@ -34,7 +34,7 @@ class LqCliente extends Model
     protected function nombre_minero(): Attribute
     {
         return Attribute::make(
-            set: fn ($value) => $value ? Str::upper($value) : '',
+            set: fn($value) => $value ? Str::upper($value) : '',
         );
     }
 
@@ -56,5 +56,9 @@ class LqCliente extends Model
     public function ubigeo()
     {
         return $this->belongsTo(Ubigeo::class, 'ubigeo_id');
+    }
+    public function lotes()
+    {
+        return $this->hasMany(Lote::class, "lq_cliente_id");
     }
 }

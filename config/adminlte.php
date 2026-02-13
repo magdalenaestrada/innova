@@ -428,10 +428,22 @@ return [
         ['header' => 'BALANZA', 'can' => 'ver pesos'],
 
         [
+            'text' => 'Pesos',
+            'url' => '/pesos',
+            'can' => 'ver pesos',
+        ],
+        
+        [
             'text' => 'Otras Balanzas',
             'url' => '/otras-balanza',
             'can' => 'ver otros pesos',
 
+        ],
+
+        [
+            'text' => 'Lotes',
+            'url' => '/lotes',
+            'can' => 'ver lotes',
         ],
 
         ['header' => 'CONFIGURACIÓN DE CUENTAS', 'can' => 'ver producto'],
